@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '../lib/auth';
@@ -13,8 +14,13 @@ import {
   expenseFormSchema,
   type ExpenseFormValues,
 } from '../lib/schemas';
-import type { ExpenseCategory } from '../types';
-import { equipmentLabel, equipmentMap } from '../domain/equipment';
+import type { Equipment, ExpenseCategory } from '../types';
+import {
+  equipmentLabel,
+  equipmentMap,
+  equipmentStatusSuffix,
+  isBorrowed,
+} from '../domain/equipment';
 import { Badge, EmptyState, Field, PageHeader, Spinner } from '../components/ui';
 import { AddIcon, TrashIcon } from '../components/icons';
 import { formatMoney } from '../utils/format';
@@ -28,6 +34,26 @@ const CATEGORIES: ExpenseCategory[] = [
   'gear',
   'other',
 ];
+
+/**
+ * A unified cost-ledger row. Manual expenses are deletable; rows derived from
+ * an equipment item's purchase/sale price link back to that item (they are
+ * edited there, not here). `amount` is positive for a cost, negative for a
+ * credit (a sale).
+ */
+interface LedgerRow {
+  key: string;
+  dateISO: string | null;
+  amount: number;
+  currency: string;
+  category: ExpenseCategory;
+  eq: Equipment | null;
+  notes: string | null;
+  /** Set only for manual expenses, which can be deleted from this page. */
+  expenseId: string | null;
+  /** True for rows derived from gear purchase/sale prices. */
+  derived: boolean;
+}
 
 export function Expenses() {
   const { user } = useAuth();
@@ -72,13 +98,65 @@ export function Expenses() {
     setOpen(false);
   }
 
-  const total = expenses.reduce((acc, e) => acc + e.amount, 0);
+  const rows = useMemo<LedgerRow[]>(() => {
+    const manual: LedgerRow[] = expenses.map((e) => ({
+      key: `expense:${e.id}`,
+      dateISO: e.dateISO,
+      amount: e.amount,
+      currency: e.currency,
+      category: e.category,
+      eq: e.equipmentId ? byId.get(e.equipmentId) ?? null : null,
+      notes: e.notes,
+      expenseId: e.id,
+      derived: false,
+    }));
+
+    const gear: LedgerRow[] = [];
+    for (const eq of equipment) {
+      if (eq.purchasePrice != null) {
+        gear.push({
+          key: `gear-purchase:${eq.id}`,
+          dateISO: eq.purchaseDateISO,
+          amount: eq.purchasePrice,
+          currency: settings.currency,
+          category: 'purchase',
+          eq,
+          notes: null,
+          expenseId: null,
+          derived: true,
+        });
+      }
+      if (eq.salePrice != null) {
+        gear.push({
+          key: `gear-sale:${eq.id}`,
+          dateISO: eq.saleDateISO,
+          amount: -eq.salePrice,
+          currency: settings.currency,
+          category: 'sale',
+          eq,
+          notes: null,
+          expenseId: null,
+          derived: true,
+        });
+      }
+    }
+
+    return [...manual, ...gear].sort((a, b) => {
+      // Most recent first; rows without a date sink to the bottom.
+      if (!a.dateISO && !b.dateISO) return 0;
+      if (!a.dateISO) return 1;
+      if (!b.dateISO) return -1;
+      return b.dateISO.localeCompare(a.dateISO);
+    });
+  }, [expenses, equipment, byId, settings.currency]);
+
+  const total = rows.reduce((acc, r) => acc + r.amount, 0);
 
   return (
     <div className="mx-auto max-w-3xl">
       <PageHeader
         title="Expenses"
-        subtitle={`Total ${formatMoney(total, settings.currency)}`}
+        subtitle={`Net total ${formatMoney(total, settings.currency)} · gear purchases, sales and extras`}
         actions={
           <button onClick={() => setOpen((o) => !o)} className="btn-primary">
             <AddIcon width={16} height={16} /> Add
@@ -116,6 +194,7 @@ export function Expenses() {
               {equipment.map((e) => (
                 <option key={e.id} value={e.id}>
                   {equipmentLabel(e)}
+                  {equipmentStatusSuffix(e)}
                 </option>
               ))}
             </select>
@@ -131,40 +210,72 @@ export function Expenses() {
 
       {loading ? (
         <Spinner label="Loading expenses…" />
-      ) : expenses.length === 0 ? (
+      ) : rows.length === 0 ? (
         <EmptyState
-          title="No expenses recorded"
-          hint="Gear purchase and sale prices already feed cost analytics; add repairs, checks and extras here."
+          title="No costs recorded yet"
+          hint="Set purchase and sale prices on your gear, or add repairs, checks and extras here — everything shows up in this ledger."
         />
       ) : (
         <div className="space-y-2">
-          {expenses.map((e) => {
-            const eq = e.equipmentId ? byId.get(e.equipmentId) : null;
+          {rows.map((r) => {
+            const meta = (
+              <p className="mt-0.5 truncate text-xs text-muted">
+                {r.dateISO ? formatSwissDate(r.dateISO) : 'No date'}
+                {r.eq
+                  ? ` · ${equipmentLabel(r.eq)}${isBorrowed(r.eq) ? ' (borrowed)' : ''}`
+                  : ''}
+                {r.notes ? ` · ${r.notes}` : ''}
+              </p>
+            );
+            const head = (
+              <div className="flex flex-wrap items-center gap-2">
+                <p
+                  className={`font-semibold ${r.amount < 0 ? 'text-ok' : ''}`}
+                >
+                  {formatMoney(r.amount, r.currency)}
+                </p>
+                <Badge tone={r.category === 'sale' ? 'ok' : 'neutral'}>
+                  {r.category}
+                </Badge>
+                {r.derived && <Badge tone="neutral">from gear</Badge>}
+              </div>
+            );
+
+            if (r.derived && r.eq) {
+              return (
+                <Link
+                  key={r.key}
+                  to={`/equipment/${r.eq.id}`}
+                  className="card flex items-center justify-between gap-3 transition hover:border-brand"
+                >
+                  <div className="min-w-0">
+                    {head}
+                    {meta}
+                  </div>
+                </Link>
+              );
+            }
+
             return (
               <div
-                key={e.id}
+                key={r.key}
                 className="card flex items-center justify-between gap-3"
               >
                 <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="font-semibold">
-                      {formatMoney(e.amount, e.currency)}
-                    </p>
-                    <Badge tone="neutral">{e.category}</Badge>
-                  </div>
-                  <p className="mt-0.5 truncate text-xs text-muted">
-                    {formatSwissDate(e.dateISO)}
-                    {eq ? ` · ${equipmentLabel(eq)}` : ''}
-                    {e.notes ? ` · ${e.notes}` : ''}
-                  </p>
+                  {head}
+                  {meta}
                 </div>
-                <button
-                  onClick={() => user && void deleteExpense(user.uid, e.id)}
-                  className="rounded-lg p-2 text-muted hover:text-danger"
-                  title="Delete"
-                >
-                  <TrashIcon width={16} height={16} />
-                </button>
+                {r.expenseId && (
+                  <button
+                    onClick={() =>
+                      user && void deleteExpense(user.uid, r.expenseId!)
+                    }
+                    className="rounded-lg p-2 text-muted hover:text-danger"
+                    title="Delete"
+                  >
+                    <TrashIcon width={16} height={16} />
+                  </button>
+                )}
               </div>
             );
           })}

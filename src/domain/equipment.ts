@@ -15,6 +15,26 @@ export function equipmentLabel(eq: Equipment): string {
   return eq.size ? `${base} (${eq.size})` : base;
 }
 
+/** Whether a piece of gear is borrowed (owned by someone else). */
+export function isBorrowed(eq: Equipment): boolean {
+  return eq.status === 'borrowed';
+}
+
+/** Human label for borrowed gear, including the owner when known. */
+export function borrowedLabel(eq: Equipment): string {
+  return eq.owner ? `Borrowed · ${eq.owner}` : 'Borrowed';
+}
+
+/**
+ * Status suffix for text-only contexts such as `<option>` labels, e.g.
+ * ` (borrowed)` or ` (sold)`. Returns an empty string for active gear.
+ */
+export function equipmentStatusSuffix(eq: Equipment): string {
+  if (eq.status === 'sold') return ' (sold)';
+  if (eq.status === 'borrowed') return ' (borrowed)';
+  return '';
+}
+
 /** Sold gear is hidden from flight dropdowns; active and borrowed remain. */
 export function isSelectableForFlight(eq: Equipment): boolean {
   return eq.status !== 'sold';

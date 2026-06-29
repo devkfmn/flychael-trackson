@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useEquipment, useFlights } from '../data/hooks';
-import { equipmentLabel, equipmentMap } from '../domain/equipment';
+import { equipmentLabel, equipmentMap, isBorrowed } from '../domain/equipment';
 import { EmptyState, PageHeader, Spinner } from '../components/ui';
 import { AddIcon } from '../components/icons';
 import { formatAirtime } from '../utils/format';
@@ -53,7 +53,9 @@ export function Flights() {
                   <p className="mt-0.5 truncate text-xs text-muted">
                     {formatSwissDate(f.dateISO)}
                     {f.time ? ` · ${f.time}` : ''}
-                    {wing ? ` · ${equipmentLabel(wing)}` : ''}
+                    {wing
+                      ? ` · ${equipmentLabel(wing)}${isBorrowed(wing) ? ' (borrowed)' : ''}`
+                      : ''}
                     {f.source === 'igc' ? ' · IGC' : ''}
                   </p>
                 </div>

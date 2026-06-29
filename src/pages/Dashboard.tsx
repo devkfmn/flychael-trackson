@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useEquipment, useExpenses, useFlights, useSettings } from '../data/hooks';
 import { computeDashboard, type MaintenanceItem } from '../domain/analytics';
-import { equipmentLabel } from '../domain/equipment';
+import { borrowedLabel, equipmentLabel, isBorrowed } from '../domain/equipment';
 import {
   Badge,
   EmptyState,
@@ -89,7 +89,14 @@ export function Dashboard() {
                 to={`/equipment/${m.equipment.id}`}
                 className="card flex items-center justify-between gap-2 transition hover:border-brand"
               >
-                <span className="font-medium">{equipmentLabel(m.equipment)}</span>
+                <span className="flex flex-wrap items-center gap-2">
+                  <span className="font-medium">
+                    {equipmentLabel(m.equipment)}
+                  </span>
+                  {isBorrowed(m.equipment) && (
+                    <Badge tone="brand">{borrowedLabel(m.equipment)}</Badge>
+                  )}
+                </span>
                 <Badge tone="warn">No check/repack date</Badge>
               </Link>
             ))}
@@ -232,7 +239,12 @@ function MaintenanceRow({ item }: { item: MaintenanceItem }) {
       className="card flex items-center justify-between gap-3 transition hover:border-brand"
     >
       <div className="min-w-0">
-        <p className="font-semibold">{equipmentLabel(item.equipment)}</p>
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="font-semibold">{equipmentLabel(item.equipment)}</p>
+          {isBorrowed(item.equipment) && (
+            <Badge tone="brand">{borrowedLabel(item.equipment)}</Badge>
+          )}
+        </div>
         <p className="mt-0.5 text-xs text-muted">
           {item.result.reason}
           {item.result.daysRemaining != null &&

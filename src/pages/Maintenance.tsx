@@ -1,10 +1,15 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useEquipment, useFlights, useSettings } from '../data/hooks';
-import { equipmentLabel, maintenanceFor } from '../domain/equipment';
+import {
+  borrowedLabel,
+  equipmentLabel,
+  isBorrowed,
+  maintenanceFor,
+} from '../domain/equipment';
 import type { MaintenanceResult } from '../domain/maintenance';
 import type { Equipment } from '../types';
-import { EmptyState, PageHeader, Spinner, StatusPill } from '../components/ui';
+import { Badge, EmptyState, PageHeader, Spinner, StatusPill } from '../components/ui';
 import { formatSwissDate } from '../utils/dates';
 
 interface Row {
@@ -54,7 +59,12 @@ export function Maintenance() {
             >
               <div className="flex items-start justify-between gap-2">
                 <div>
-                  <p className="font-semibold">{equipmentLabel(eq)}</p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="font-semibold">{equipmentLabel(eq)}</p>
+                    {isBorrowed(eq) && (
+                      <Badge tone="brand">{borrowedLabel(eq)}</Badge>
+                    )}
+                  </div>
                   <p className="mt-0.5 text-xs text-muted">
                     {result.reason}
                     {result.dueDateISO

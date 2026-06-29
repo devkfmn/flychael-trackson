@@ -5,7 +5,7 @@ import { useAuth } from '../lib/auth';
 import { saveSettings, useEquipment, useSettings } from '../data/hooks';
 import { settingsFormSchema, type SettingsFormValues } from '../lib/schemas';
 import { selectableByType } from '../domain/equipment';
-import { equipmentLabel } from '../domain/equipment';
+import { equipmentLabel, equipmentStatusSuffix } from '../domain/equipment';
 import {
   DEFAULT_MAINTENANCE_DEFAULTS,
   type UserSettings,
@@ -103,6 +103,7 @@ export function Settings() {
                 {wings.map((w) => (
                   <option key={w.id} value={w.id}>
                     {equipmentLabel(w)}
+                    {equipmentStatusSuffix(w)}
                   </option>
                 ))}
               </select>
@@ -113,6 +114,7 @@ export function Settings() {
                 {harnesses.map((h) => (
                   <option key={h.id} value={h.id}>
                     {equipmentLabel(h)}
+                    {equipmentStatusSuffix(h)}
                   </option>
                 ))}
               </select>

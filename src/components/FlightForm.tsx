@@ -3,7 +3,11 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { flightFormSchema, type FlightFormValues } from '../lib/schemas';
 import type { Equipment, IgcMeta, TrackMeta } from '../types';
-import { selectableByType, equipmentLabel } from '../domain/equipment';
+import {
+  selectableByType,
+  equipmentLabel,
+  equipmentStatusSuffix,
+} from '../domain/equipment';
 import {
   SOURCE_LABELS,
   type PrefillField,
@@ -175,7 +179,7 @@ export function FlightForm({
             {wings.map((w) => (
               <option key={w.id} value={w.id}>
                 {equipmentLabel(w)}
-                {w.status === 'sold' ? ' (sold)' : ''}
+                {equipmentStatusSuffix(w)}
               </option>
             ))}
           </select>
@@ -196,7 +200,7 @@ export function FlightForm({
             {harnesses.map((h) => (
               <option key={h.id} value={h.id}>
                 {equipmentLabel(h)}
-                {h.status === 'sold' ? ' (sold)' : ''}
+                {equipmentStatusSuffix(h)}
               </option>
             ))}
           </select>

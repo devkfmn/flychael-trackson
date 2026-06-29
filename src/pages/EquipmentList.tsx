@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { EQUIPMENT_TYPE_LABELS, type EquipmentType } from '../types';
 import { useEquipment, useFlights, useSettings } from '../data/hooks';
-import { equipmentLabel, maintenanceFor } from '../domain/equipment';
+import { borrowedLabel, equipmentLabel, maintenanceFor } from '../domain/equipment';
 import { Badge, EmptyState, PageHeader, Spinner, StatusPill } from '../components/ui';
 import { AddIcon } from '../components/icons';
 import { formatSwissDate } from '../utils/dates';
@@ -88,7 +88,7 @@ export function EquipmentList() {
                       <div className="mt-3 flex flex-wrap items-center gap-1.5">
                         {eq.status === 'sold' && <Badge tone="neutral">Sold</Badge>}
                         {eq.status === 'borrowed' && (
-                          <Badge tone="brand">Borrowed</Badge>
+                          <Badge tone="brand">{borrowedLabel(eq)}</Badge>
                         )}
                         {eq.lastCheckDateISO && (
                           <Badge tone="neutral">
