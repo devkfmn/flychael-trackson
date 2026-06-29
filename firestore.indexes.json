@@ -1,0 +1,21 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "flights",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "dateISO", "order": "DESCENDING" },
+        { "fieldPath": "time", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "equipment",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "type", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

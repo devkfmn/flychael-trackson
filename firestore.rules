@@ -1,0 +1,46 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    // The user profile/settings document.
+    match /users/{uid} {
+      allow read, write: if isOwner(uid);
+
+      // All user-owned data lives under the user document. Access is granted
+      // only to the authenticated owner of that subtree.
+      match /equipment/{equipmentId} {
+        allow read: if isOwner(uid);
+        allow create, update: if isOwner(uid)
+          && request.resource.data.type in ['paraglider', 'harness', 'reserve', 'other']
+          && request.resource.data.status in ['active', 'borrowed', 'sold'];
+        allow delete: if isOwner(uid);
+      }
+
+      match /flights/{flightId} {
+        allow read: if isOwner(uid);
+        allow create, update: if isOwner(uid)
+          && request.resource.data.airtimeMinutes is number
+          && request.resource.data.airtimeMinutes >= 0
+          && request.resource.data.dateISO is string;
+        allow delete: if isOwner(uid);
+      }
+
+      match /expenses/{expenseId} {
+        allow read: if isOwner(uid);
+        allow create, update: if isOwner(uid)
+          && request.resource.data.amount is number;
+        allow delete: if isOwner(uid);
+      }
+    }
+
+    // Deny everything else by default.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
