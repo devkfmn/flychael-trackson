@@ -92,7 +92,7 @@ export function Settings() {
 
         <div className="card space-y-4">
           <h2 className="font-semibold">Default setup</h2>
-          <p className="-mt-2 text-xs text-">
+          <p className="-mt-2 text-xs text-muted">
             Used as the baseline for Add Flight suggestions and trip-mode
             detection.
           </p>
@@ -130,7 +130,7 @@ export function Settings() {
 
         <div className="card space-y-4">
           <h2 className="font-semibold">Maintenance defaults</h2>
-          <p className="-mt-2 text-xs text-">
+          <p className="-mt-2 text-xs text-muted">
             Wings and harnesses are due at the first threshold reached. Reserves
             use repack interval only.
           </p>
@@ -154,7 +154,7 @@ export function Settings() {
           <button type="submit" className="btn-primary">
             Save settings
           </button>
-          {saved && <span className="text-sm text-">Saved.</span>}
+          {saved && <span className="text-sm text-ok">Saved.</span>}
         </div>
       </form>
     </div>

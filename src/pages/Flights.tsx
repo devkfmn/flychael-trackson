@@ -43,14 +43,14 @@ export function Flights() {
               <Link
                 key={f.id}
                 to={`/flights/${f.id}`}
-                className="card flex items-center justify-between gap-3 transition hover:border-"
+                className="card flex items-center justify-between gap-3 transition hover:border-brand"
               >
                 <div className="min-w-0">
                   <p className="font-semibold">
-                    {f.takeoff} <span className="text-">→</span>{' '}
+                    {f.takeoff} <span className="text-muted">→</span>{' '}
                     {f.landing}
                   </p>
-                  <p className="mt-0.5 truncate text-xs text-">
+                  <p className="mt-0.5 truncate text-xs text-muted">
                     {formatSwissDate(f.dateISO)}
                     {f.time ? ` · ${f.time}` : ''}
                     {wing ? ` · ${equipmentLabel(wing)}` : ''}
@@ -62,7 +62,7 @@ export function Flights() {
                     {formatAirtime(f.airtimeMinutes)}
                   </p>
                   {f.distanceKm != null && (
-                    <p className="text-xs text-">{f.distanceKm} km</p>
+                    <p className="text-xs text-muted">{f.distanceKm} km</p>
                   )}
                 </div>
               </Link>

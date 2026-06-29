@@ -21,9 +21,14 @@ export function Login() {
   return (
     <div className="grid min-h-full place-items-center px-4">
       <div className="w-full max-w-sm text-center">
-        <img src="/icon.svg" alt="" className="mx-auto h-16 w-16 rounded-2xl" />
-        <h1 className="mt-5 text-2xl font-bold">Flychael Trackson</h1>
-        <p className="mt-1 text-sm text-">
+        <div className="mx-auto w-full max-w-[15rem] rounded-3xl bg-white p-3 shadow-lg">
+          <img
+            src="/logo.png"
+            alt="Flychael Trackson"
+            className="h-auto w-full"
+          />
+        </div>
+        <p className="mt-5 text-sm text-muted">
           Paragliding flight log and equipment maintenance.
         </p>
 
@@ -36,7 +41,7 @@ export function Login() {
         </button>
 
         {error && (
-          <p className="mt-4 text-sm text-">{error}</p>
+          <p className="mt-4 text-sm text-danger">{error}</p>
         )}
       </div>
     </div>

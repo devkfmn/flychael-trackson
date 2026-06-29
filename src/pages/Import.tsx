@@ -55,8 +55,8 @@ export function ImportPage() {
       />
 
       {alreadyImported && phase !== 'done' && (
-        <div className="card mb-5 border-/40 bg-/10">
-          <p className="text-sm font-medium text-">
+        <div className="card mb-5 border-warn/40 bg-warn/10">
+          <p className="text-sm font-medium text-warn">
             You already imported on {formatSwissDate(
               new Date(settings.importedAt as number).toISOString().slice(0, 10),
             )}
@@ -84,11 +84,11 @@ export function ImportPage() {
               if (f) void onFile(f);
             }}
           />
-          <p className="mt-2 text-xs text-">
+          <p className="mt-2 text-xs text-muted">
             Old app tags (e.g. Horus) are ignored. Pilot, paragliders, harnesses,
             reserves and flights are normalized into your account.
           </p>
-          {error && <p className="mt-3 text-sm text-">{error}</p>}
+          {error && <p className="mt-3 text-sm text-danger">{error}</p>}
         </div>
       )}
 
@@ -110,7 +110,7 @@ export function ImportPage() {
               {mapped.pilot.shvNr ? ` · SHV ${mapped.pilot.shvNr}` : ''}
             </p>
             {mapped.stats.earliestDate && (
-              <p className="mt-1 text-xs text-">
+              <p className="mt-1 text-xs text-muted">
                 Flights from {formatSwissDate(mapped.stats.earliestDate)} to{' '}
                 {formatSwissDate(mapped.stats.latestDate)}
               </p>
@@ -120,7 +120,7 @@ export function ImportPage() {
           {mapped.warnings.length > 0 && (
             <div className="card">
               <div className="mb-2 flex items-center gap-2">
-                <AlertIcon width={16} height={16} className="text-" />
+                <AlertIcon width={16} height={16} className="text-warn" />
                 <p className="text-sm font-semibold">
                   {mapped.warnings.length} data quality warning
                   {mapped.warnings.length > 1 ? 's' : ''}
@@ -129,12 +129,12 @@ export function ImportPage() {
               <div className="max-h-60 space-y-1 overflow-auto">
                 {mapped.warnings.map((w, i) => (
                   <div key={i} className="flex items-center justify-between gap-2 text-sm">
-                    <span className="text-">{w.message}</span>
+                    <span className="text-muted">{w.message}</span>
                     <Badge tone="warn">{w.kind}</Badge>
                   </div>
                 ))}
               </div>
-              <p className="mt-2 text-xs text-">
+              <p className="mt-2 text-xs text-muted">
                 Warnings are informational — the import will still proceed.
               </p>
             </div>
@@ -162,9 +162,9 @@ export function ImportPage() {
       )}
 
       {phase === 'done' && result && (
-        <div className="card border-/40 bg-/10">
-          <p className="font-semibold text-">Import complete</p>
-          <p className="mt-1 text-sm text-">
+        <div className="card border-ok/40 bg-ok/10">
+          <p className="font-semibold text-ok">Import complete</p>
+          <p className="mt-1 text-sm text-muted">
             Imported {result.e} equipment items and {result.f} flights.
           </p>
           <div className="mt-3 flex gap-2">

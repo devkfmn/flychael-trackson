@@ -6,11 +6,12 @@ import { NAV_ITEMS } from './nav';
 function Brand() {
   return (
     <div className="flex items-center gap-2.5">
-      <img src="/icon.svg" alt="" className="h-9 w-9 rounded-xl" />
-      <div className="leading-tight">
-        <p className="text-sm font-bold">Flychael</p>
-        <p className="text-xs text-">Trackson</p>
-      </div>
+      <span className="grid h-10 w-10 place-items-center overflow-hidden rounded-xl bg-white">
+        <img src="/logo.png" alt="" className="h-9 w-9 object-contain" />
+      </span>
+      <span className="text-sm font-extrabold tracking-tight">
+        Flychael Trackson
+      </span>
     </div>
   );
 }
@@ -22,7 +23,7 @@ export function Layout() {
   return (
     <div className="mx-auto flex min-h-full max-w-6xl">
       {/* Desktop sidebar */}
-      <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border- bg-/60 p-4 md:flex">
+      <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-border bg-surface/60 p-4 md:flex">
         <div className="px-2 py-2">
           <Brand />
         </div>
@@ -35,8 +36,8 @@ export function Layout() {
               className={({ isActive }) =>
                 `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${
                   isActive
-                    ? 'bg-/15 text-'
-                    : 'text- hover:bg- hover:text-'
+                    ? 'bg-brand/15 text-brand-soft'
+                    : 'text-muted hover:bg-surface-2 hover:text-text'
                 }`
               }
             >
@@ -45,7 +46,7 @@ export function Layout() {
             </NavLink>
           ))}
         </nav>
-        <div className="mt-auto border-t border- pt-3">
+        <div className="mt-auto border-t border-border pt-3">
           <div className="flex items-center gap-2 px-2">
             {user?.photoURL ? (
               <img
@@ -55,7 +56,7 @@ export function Layout() {
                 referrerPolicy="no-referrer"
               />
             ) : (
-              <div className="grid h-8 w-8 place-items-center rounded-full bg- text-xs font-bold">
+              <div className="grid h-8 w-8 place-items-center rounded-full bg-surface-2 text-xs font-bold">
                 {(user?.displayName ?? user?.email ?? '?')[0]?.toUpperCase()}
               </div>
             )}
@@ -66,7 +67,7 @@ export function Layout() {
             </div>
             <button
               onClick={() => void logout()}
-              className="rounded-lg p-1.5 text- hover:bg- hover:text-"
+              className="rounded-lg p-1.5 text-muted hover:bg-surface-2 hover:text-danger"
               title="Sign out"
             >
               <LogoutIcon width={18} height={18} />
@@ -78,11 +79,11 @@ export function Layout() {
       {/* Main */}
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Mobile top bar */}
-        <header className="sticky top-0 z-10 flex items-center justify-between border-b border- bg-/90 px-4 py-3 backdrop-blur md:hidden">
+        <header className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-bg/90 px-4 py-3 backdrop-blur md:hidden">
           <Brand />
           <button
             onClick={() => void logout()}
-            className="rounded-lg p-2 text- hover:text-"
+            className="rounded-lg p-2 text-muted hover:text-danger"
             title="Sign out"
           >
             <LogoutIcon width={18} height={18} />
@@ -94,7 +95,7 @@ export function Layout() {
         </main>
 
         {/* Mobile bottom nav */}
-        <nav className="safe-bottom fixed inset-x-0 bottom-0 z-10 flex items-stretch justify-around border-t border- bg-/95 backdrop-blur md:hidden">
+        <nav className="safe-bottom fixed inset-x-0 bottom-0 z-10 flex items-stretch justify-around border-t border-border bg-surface/95 backdrop-blur md:hidden">
           {primary.map((item) => (
             <NavLink
               key={item.to}
@@ -102,7 +103,7 @@ export function Layout() {
               end={item.end}
               className={({ isActive }) =>
                 `flex flex-1 flex-col items-center gap-1 py-2.5 text-[10px] font-medium transition ${
-                  isActive ? 'text-' : 'text-'
+                  isActive ? 'text-brand-soft' : 'text-muted'
                 }`
               }
             >

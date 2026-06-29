@@ -152,7 +152,7 @@ export function Expenses() {
                     </p>
                     <Badge tone="neutral">{e.category}</Badge>
                   </div>
-                  <p className="mt-0.5 truncate text-xs text-">
+                  <p className="mt-0.5 truncate text-xs text-muted">
                     {formatSwissDate(e.dateISO)}
                     {eq ? ` · ${equipmentLabel(eq)}` : ''}
                     {e.notes ? ` · ${e.notes}` : ''}
@@ -160,7 +160,7 @@ export function Expenses() {
                 </div>
                 <button
                   onClick={() => user && void deleteExpense(user.uid, e.id)}
-                  className="rounded-lg p-2 text- hover:text-"
+                  className="rounded-lg p-2 text-muted hover:text-danger"
                   title="Delete"
                 >
                   <TrashIcon width={16} height={16} />

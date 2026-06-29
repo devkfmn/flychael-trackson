@@ -87,7 +87,7 @@ export function Dashboard() {
               <Link
                 key={m.equipment.id}
                 to={`/equipment/${m.equipment.id}`}
-                className="card flex items-center justify-between gap-2 transition hover:border-"
+                className="card flex items-center justify-between gap-2 transition hover:border-brand"
               >
                 <span className="font-medium">{equipmentLabel(m.equipment)}</span>
                 <Badge tone="warn">No check/repack date</Badge>
@@ -131,13 +131,13 @@ export function Dashboard() {
         {/* 5. Top sites */}
         <Section title="Most used takeoffs">
           {d.topSites.length === 0 ? (
-            <p className="text-sm text-">No data yet.</p>
-          ) : (
-            <div className="card space-y-1.5">
+          <p className="text-sm text-muted">No data yet.</p>
+        ) : (
+          <div className="card space-y-1.5">
               {d.topSites.map((s) => (
                 <div key={s.site} className="flex justify-between text-sm">
                   <span>{s.site}</span>
-                  <span className="tabular-nums text-">{s.count}</span>
+                  <span className="tabular-nums text-muted">{s.count}</span>
                 </div>
               ))}
             </div>
@@ -148,26 +148,26 @@ export function Dashboard() {
         <Section
           title="Recent flights"
           right={
-            <Link to="/flights" className="text-xs text-">
+            <Link to="/flights" className="text-xs text-brand-soft">
               View all
             </Link>
           }
         >
           {d.recentFlights.length === 0 ? (
-            <p className="text-sm text-">No flights yet.</p>
+            <p className="text-sm text-muted">No flights yet.</p>
           ) : (
             <div className="space-y-2">
               {d.recentFlights.map((f) => (
                 <Link
                   key={f.id}
                   to={`/flights/${f.id}`}
-                  className="card flex items-center justify-between gap-2 transition hover:border-"
+                  className="card flex items-center justify-between gap-2 transition hover:border-brand"
                 >
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium">
                       {f.takeoff} → {f.landing}
                     </p>
-                    <p className="text-xs text-">
+                    <p className="text-xs text-muted">
                       {formatSwissDate(f.dateISO)}
                     </p>
                   </div>
@@ -208,13 +208,13 @@ export function Dashboard() {
                 <AlertIcon
                   width={16}
                   height={16}
-                  className="mt-0.5 shrink-0 text-"
+                  className="mt-0.5 shrink-0 text-warn"
                 />
-                <span className="text-">{w.message}</span>
+                <span className="text-muted">{w.message}</span>
               </div>
             ))}
             {d.warnings.length > 12 && (
-              <p className="pt-1 text-xs text-">
+              <p className="pt-1 text-xs text-muted">
                 +{d.warnings.length - 12} more…
               </p>
             )}
@@ -229,11 +229,11 @@ function MaintenanceRow({ item }: { item: MaintenanceItem }) {
   return (
     <Link
       to={`/equipment/${item.equipment.id}`}
-      className="card flex items-center justify-between gap-3 transition hover:border-"
+      className="card flex items-center justify-between gap-3 transition hover:border-brand"
     >
       <div className="min-w-0">
         <p className="font-semibold">{equipmentLabel(item.equipment)}</p>
-        <p className="mt-0.5 text-xs text-">
+        <p className="mt-0.5 text-xs text-muted">
           {item.result.reason}
           {item.result.daysRemaining != null &&
             ` · ${item.result.daysRemaining < 0 ? `${-item.result.daysRemaining} days over` : `${item.result.daysRemaining} days left`}`}
@@ -250,7 +250,7 @@ function UsageList({
   items: { id: string; label: string; flights: number; hours: number }[];
 }) {
   if (items.length === 0) {
-    return <p className="text-sm text-">No data yet.</p>;
+    return <p className="text-sm text-muted">No data yet.</p>;
   }
   const max = Math.max(...items.map((i) => i.hours), 1);
   return (
@@ -259,13 +259,13 @@ function UsageList({
         <div key={i.id}>
           <div className="flex justify-between text-sm">
             <span className="truncate">{i.label}</span>
-            <span className="shrink-0 tabular-nums text-">
+            <span className="shrink-0 tabular-nums text-muted">
               {formatHours(i.hours)} · {i.flights}
             </span>
           </div>
-          <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-">
+          <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-surface-2">
             <div
-              className="h-full rounded-full bg-"
+              className="h-full rounded-full bg-brand"
               style={{ width: `${(i.hours / max) * 100}%` }}
             />
           </div>

@@ -35,7 +35,7 @@ export function EquipmentList() {
         }
       />
 
-      <label className="mb-4 inline-flex items-center gap-2 text-sm text-">
+      <label className="mb-4 inline-flex items-center gap-2 text-sm text-muted">
         <input
           type="checkbox"
           checked={showSold}
@@ -60,7 +60,7 @@ export function EquipmentList() {
         <div className="space-y-6">
           {grouped.map((group) => (
             <section key={group.type}>
-              <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-">
+              <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted">
                 {EQUIPMENT_TYPE_LABELS[group.type]}
               </h2>
               <div className="grid gap-2 sm:grid-cols-2">
@@ -70,14 +70,14 @@ export function EquipmentList() {
                     <Link
                       key={eq.id}
                       to={`/equipment/${eq.id}`}
-                      className="card transition hover:border-"
+                      className="card transition hover:border-brand"
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
                           <p className="truncate font-semibold">
                             {equipmentLabel(eq)}
                           </p>
-                          <p className="mt-0.5 text-xs text-">
+                          <p className="mt-0.5 text-xs text-muted">
                             {eq.serialNumber
                               ? `SN ${eq.serialNumber}`
                               : 'No serial number'}
@@ -98,7 +98,7 @@ export function EquipmentList() {
                         )}
                       </div>
                       {m.applicable && m.status !== 'ok' && (
-                        <p className="mt-2 text-xs text-">
+                        <p className="mt-2 text-xs text-muted">
                           {m.reason}
                         </p>
                       )}

@@ -114,7 +114,7 @@ export function FlightForm({
   return (
     <form onSubmit={handleSubmit(submit)} className="card space-y-4">
       {showIgc && (
-        <div className="rounded-xl border border-dashed border- bg- p-3">
+        <div className="rounded-xl border border-dashed border-border bg-surface-2 p-3">
           <label className="label">Import IGC track (optional)</label>
           <input
             type="file"
@@ -126,13 +126,13 @@ export function FlightForm({
             }}
           />
           {igcInfo && (
-            <p className="mt-2 text-xs text-">{igcInfo}</p>
+            <p className="mt-2 text-xs text-brand-soft">{igcInfo}</p>
           )}
         </div>
       )}
 
       {prefill && prefill.tripModeActive && (
-        <div className="rounded-xl border border-/40 bg-/10 px-3 py-2 text-xs font-medium text-">
+        <div className="rounded-xl border border-brand/40 bg-brand/10 px-3 py-2 text-xs font-medium text-brand-soft">
           Trip mode active — suggesting your current trip setup until you change
           it.
         </div>
@@ -260,11 +260,11 @@ function Chip({
     <button
       type="button"
       onClick={() => onApply(field.value as string)}
-      className="chip mt-1.5 hover:border-"
+      className="chip mt-1.5 hover:border-brand"
       title={`Apply suggestion from ${SOURCE_LABELS[field.source]}`}
     >
       <CheckIcon width={13} height={13} />
-      <span className="text-">
+      <span className="text-muted">
         {SOURCE_LABELS[field.source]}:
       </span>
       <span className="font-semibold">{display}</span>

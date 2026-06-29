@@ -26,7 +26,7 @@ export function FlightDetail() {
   );
 
   if (loading && !flight) return <Spinner label="Loading flight…" />;
-  if (!flight) return <p className="text-">Flight not found.</p>;
+  if (!flight) return <p className="text-muted">Flight not found.</p>;
 
   const initial: FlightFormValues = {
     dateISO: flight.dateISO,

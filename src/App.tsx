@@ -19,8 +19,13 @@ export function App() {
 
   if (loading) {
     return (
-      <div className="grid min-h-full place-items-center">
-        <Spinner label="Loading…" />
+      <div className="grid min-h-full place-items-center px-4">
+        <div className="text-center">
+          <div className="mx-auto w-full max-w-[12rem] rounded-3xl bg-white p-3 shadow-lg">
+            <img src="/logo.png" alt="Flychael Trackson" className="h-auto w-full" />
+          </div>
+          <Spinner label="Loading…" />
+        </div>
       </div>
     );
   }

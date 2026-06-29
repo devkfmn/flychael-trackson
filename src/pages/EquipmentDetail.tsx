@@ -110,7 +110,7 @@ export function EquipmentDetail() {
     return <Spinner label="Loading equipment…" />;
   }
   if (id && !loading && !existing) {
-    return <p className="text-">Equipment not found.</p>;
+    return <p className="text-muted">Equipment not found.</p>;
   }
 
   const typeDefault = defaultRuleForType(type, settings.maintenanceDefaults);
@@ -264,7 +264,7 @@ export function EquipmentDetail() {
         </Field>
 
         {type !== 'other' && (
-          <div className="rounded-xl border border- bg- p-3">
+          <div className="rounded-xl border border-border bg-surface-2 p-3">
             <label className="flex items-center gap-2 text-sm font-medium">
               <input
                 type="checkbox"
@@ -273,7 +273,7 @@ export function EquipmentDetail() {
               />
               Custom maintenance rule
             </label>
-            <p className="mt-1 text-xs text-">
+            <p className="mt-1 text-xs text-muted">
               {reserveSelected
                 ? `Default: repack every ${typeDefault?.months ?? '—'} months.`
                 : `Default: check at first of ${typeDefault?.months ?? '—'} months / ${typeDefault?.flights ?? '—'} flights / ${typeDefault?.hours ?? '—'} hours.`}

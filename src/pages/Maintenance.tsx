@@ -50,12 +50,12 @@ export function Maintenance() {
             <Link
               key={eq.id}
               to={`/equipment/${eq.id}`}
-              className="card block transition hover:border-"
+              className="card block transition hover:border-brand"
             >
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <p className="font-semibold">{equipmentLabel(eq)}</p>
-                  <p className="mt-0.5 text-xs text-">
+                  <p className="mt-0.5 text-xs text-muted">
                     {result.reason}
                     {result.dueDateISO
                       ? ` · Due ${formatSwissDate(result.dueDateISO)}`
@@ -74,13 +74,13 @@ export function Maintenance() {
                     );
                     return (
                       <div key={d.metric}>
-                        <div className="flex justify-between text-[11px] text-">
+                        <div className="flex justify-between text-[11px] text-muted">
                           <span className="capitalize">{d.metric}</span>
                           <span className="tabular-nums">
                             {Math.round(d.used * 10) / 10}/{d.threshold}
                           </span>
                         </div>
-                        <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-">
+                        <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-surface-2">
                           <div
                             className={`h-full rounded-full ${
                               pct >= 100
