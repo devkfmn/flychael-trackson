@@ -13,7 +13,7 @@ export default defineConfig({
       includeAssets: ['favicon.png', 'apple-touch-icon.png', 'logo.png'],
       manifest: {
         name: 'Flychael Trackson',
-        short_name: 'Trackson',
+        short_name: 'Flychael Trackson',
         description: 'Paragliding flight tracking and equipment maintenance',
         theme_color: '#0b1220',
         background_color: '#0b1220',
