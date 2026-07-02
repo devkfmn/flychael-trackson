@@ -14,14 +14,19 @@ export function EquipmentList() {
   const { data: flights } = useFlights();
   const { settings } = useSettings();
   const [showSold, setShowSold] = useState(false);
+  const [showBorrowed, setShowBorrowed] = useState(false);
 
   const grouped = useMemo(() => {
-    const visible = equipment.filter((e) => showSold || e.status !== 'sold');
+    const visible = equipment.filter(
+      (e) =>
+        (showSold || e.status !== 'sold') &&
+        (showBorrowed || e.status !== 'borrowed'),
+    );
     return ORDER.map((type) => ({
       type,
       items: visible.filter((e) => e.type === type),
     })).filter((g) => g.items.length > 0);
-  }, [equipment, showSold]);
+  }, [equipment, showSold, showBorrowed]);
 
   return (
     <div>
@@ -35,14 +40,24 @@ export function EquipmentList() {
         }
       />
 
-      <label className="mb-4 inline-flex items-center gap-2 text-sm text-muted">
-        <input
-          type="checkbox"
-          checked={showSold}
-          onChange={(e) => setShowSold(e.target.checked)}
-        />
-        Show sold gear
-      </label>
+      <div className="mb-4 flex flex-wrap gap-4">
+        <label className="inline-flex items-center gap-2 text-sm text-muted">
+          <input
+            type="checkbox"
+            checked={showSold}
+            onChange={(e) => setShowSold(e.target.checked)}
+          />
+          Show sold gear
+        </label>
+        <label className="inline-flex items-center gap-2 text-sm text-muted">
+          <input
+            type="checkbox"
+            checked={showBorrowed}
+            onChange={(e) => setShowBorrowed(e.target.checked)}
+          />
+          Show borrowed gear
+        </label>
+      </div>
 
       {loading ? (
         <Spinner label="Loading equipment…" />

@@ -16,7 +16,7 @@ const firebaseConfig: FirebaseOptions = {
 };
 
 if (!firebaseConfig.apiKey) {
-  throw new Error(
+  console.error(
     'Missing Firebase configuration. Copy .env.example to .env and fill in the values.',
   );
 }

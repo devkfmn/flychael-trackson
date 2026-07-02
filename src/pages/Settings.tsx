@@ -49,10 +49,15 @@ export function Settings() {
       },
       currency: p.currency,
       maintenanceDefaults: {
-        wingHarness: {
-          months: p.wingHarnessMonths ?? DEFAULT_MAINTENANCE_DEFAULTS.wingHarness.months,
-          flights: p.wingHarnessFlights ?? DEFAULT_MAINTENANCE_DEFAULTS.wingHarness.flights,
-          hours: p.wingHarnessHours ?? DEFAULT_MAINTENANCE_DEFAULTS.wingHarness.hours,
+        wing: {
+          months: p.wingMonths ?? DEFAULT_MAINTENANCE_DEFAULTS.wing.months,
+          flights: p.wingFlights ?? DEFAULT_MAINTENANCE_DEFAULTS.wing.flights,
+          hours: p.wingHours ?? DEFAULT_MAINTENANCE_DEFAULTS.wing.hours,
+        },
+        harness: {
+          months: p.harnessMonths ?? DEFAULT_MAINTENANCE_DEFAULTS.harness.months,
+          flights: p.harnessFlights ?? DEFAULT_MAINTENANCE_DEFAULTS.harness.flights,
+          hours: p.harnessHours ?? DEFAULT_MAINTENANCE_DEFAULTS.harness.hours,
         },
         reserve: {
           months: p.reserveMonths ?? DEFAULT_MAINTENANCE_DEFAULTS.reserve.months,
@@ -136,15 +141,28 @@ export function Settings() {
             Wings and harnesses are due at the first threshold reached. Reserves
             use repack interval only.
           </p>
+          <h3 className="text-sm font-medium">Wing</h3>
           <div className="grid grid-cols-3 gap-3">
-            <Field label="Wing/harness months">
-              <input className="input" inputMode="numeric" {...register('wingHarnessMonths')} />
+            <Field label="Months">
+              <input className="input" inputMode="numeric" {...register('wingMonths')} />
             </Field>
             <Field label="Flights">
-              <input className="input" inputMode="numeric" {...register('wingHarnessFlights')} />
+              <input className="input" inputMode="numeric" {...register('wingFlights')} />
             </Field>
             <Field label="Hours">
-              <input className="input" inputMode="numeric" {...register('wingHarnessHours')} />
+              <input className="input" inputMode="numeric" {...register('wingHours')} />
+            </Field>
+          </div>
+          <h3 className="text-sm font-medium">Harness</h3>
+          <div className="grid grid-cols-3 gap-3">
+            <Field label="Months">
+              <input className="input" inputMode="numeric" {...register('harnessMonths')} />
+            </Field>
+            <Field label="Flights">
+              <input className="input" inputMode="numeric" {...register('harnessFlights')} />
+            </Field>
+            <Field label="Hours">
+              <input className="input" inputMode="numeric" {...register('harnessHours')} />
             </Field>
           </div>
           <Field label="Reserve repack (months)">
@@ -173,9 +191,12 @@ function toForm(s: UserSettings): SettingsFormValues {
     defaultTakeoff: s.defaults.takeoff ?? '',
     defaultLanding: s.defaults.landing ?? '',
     currency: s.currency,
-    wingHarnessMonths: s.maintenanceDefaults.wingHarness.months ?? '',
-    wingHarnessFlights: s.maintenanceDefaults.wingHarness.flights ?? '',
-    wingHarnessHours: s.maintenanceDefaults.wingHarness.hours ?? '',
+    wingMonths: s.maintenanceDefaults.wing.months ?? '',
+    wingFlights: s.maintenanceDefaults.wing.flights ?? '',
+    wingHours: s.maintenanceDefaults.wing.hours ?? '',
+    harnessMonths: s.maintenanceDefaults.harness.months ?? '',
+    harnessFlights: s.maintenanceDefaults.harness.flights ?? '',
+    harnessHours: s.maintenanceDefaults.harness.hours ?? '',
     reserveMonths: s.maintenanceDefaults.reserve.months ?? '',
   };
 }

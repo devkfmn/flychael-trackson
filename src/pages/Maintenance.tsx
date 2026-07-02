@@ -1,15 +1,10 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useEquipment, useFlights, useSettings } from '../data/hooks';
-import {
-  borrowedLabel,
-  equipmentLabel,
-  isBorrowed,
-  maintenanceFor,
-} from '../domain/equipment';
+import { equipmentLabel, maintenanceFor } from '../domain/equipment';
 import type { MaintenanceResult } from '../domain/maintenance';
 import type { Equipment } from '../types';
-import { Badge, EmptyState, PageHeader, Spinner, StatusPill } from '../components/ui';
+import { EmptyState, PageHeader, Spinner, StatusPill } from '../components/ui';
 import { formatSwissDate } from '../utils/dates';
 
 interface Row {
@@ -25,7 +20,7 @@ export function Maintenance() {
   const rows = useMemo<Row[]>(() => {
     const order = { overdue: 0, dueSoon: 1, unknown: 2, ok: 3 } as const;
     return equipment
-      .filter((e) => e.status !== 'sold')
+      .filter((e) => e.status === 'active')
       .map((eq) => ({ eq, result: maintenanceFor(eq, flights, settings) }))
       .filter((r) => r.result.applicable)
       .sort(
@@ -59,12 +54,7 @@ export function Maintenance() {
             >
               <div className="flex items-start justify-between gap-2">
                 <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="font-semibold">{equipmentLabel(eq)}</p>
-                    {isBorrowed(eq) && (
-                      <Badge tone="brand">{borrowedLabel(eq)}</Badge>
-                    )}
-                  </div>
+                  <p className="font-semibold">{equipmentLabel(eq)}</p>
                   <p className="mt-0.5 text-xs text-muted">
                     {result.reason}
                     {result.dueDateISO

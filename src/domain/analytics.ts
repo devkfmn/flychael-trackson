@@ -41,7 +41,6 @@ export interface DashboardData {
   flightsThisYear: number;
   hoursThisYear: number;
   byWing: UsageBucket[];
-  byHarness: UsageBucket[];
   topSites: SiteCount[];
   recentFlights: Flight[];
   totalSpend: number;
@@ -77,7 +76,6 @@ export function computeDashboard(
   let minutesThisYear = 0;
 
   const wing = new Map<string, UsageBucket>();
-  const harness = new Map<string, UsageBucket>();
   const sites = new Map<string, number>();
   const warnings: QualityWarning[] = [];
 
@@ -103,7 +101,6 @@ export function computeDashboard(
       minutesThisYear += f.airtimeMinutes;
     }
     bump(wing, f.paragliderId, f.airtimeMinutes);
-    bump(harness, f.harnessId, f.airtimeMinutes);
     if (f.takeoff) sites.set(f.takeoff, (sites.get(f.takeoff) ?? 0) + 1);
 
     if (f.airtimeMinutes <= 0) {
@@ -135,7 +132,7 @@ export function computeDashboard(
   const needsData: MaintenanceItem[] = [];
 
   for (const eq of equipment) {
-    if (eq.status === 'sold') continue;
+    if (eq.status !== 'active') continue;
     const result = maintenanceFor(eq, flights, settings, refDateISO);
     if (!result.applicable) continue;
     if (result.status === 'overdue') overdue.push({ equipment: eq, result });
@@ -182,15 +179,14 @@ export function computeDashboard(
 
   const totalHours = hours(totalMinutes);
 
-  const usageSort = (a: UsageBucket, b: UsageBucket) => b.hours - a.hours;
+  const wingSort = (a: UsageBucket, b: UsageBucket) => b.flights - a.flights;
 
   return {
     totalFlights,
     totalHours: round1(totalHours),
     flightsThisYear,
     hoursThisYear: round1(hours(minutesThisYear)),
-    byWing: [...wing.values()].sort(usageSort).map(roundBucket),
-    byHarness: [...harness.values()].sort(usageSort).map(roundBucket),
+    byWing: [...wing.values()].sort(wingSort).map(roundBucket),
     topSites: [...sites.entries()]
       .map(([site, count]) => ({ site, count }))
       .sort((a, b) => b.count - a.count)

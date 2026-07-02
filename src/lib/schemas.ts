@@ -116,9 +116,12 @@ export const settingsFormSchema = z.object({
   defaultTakeoff: optionalString,
   defaultLanding: optionalString,
   currency: z.string().trim().min(1).default('CHF'),
-  wingHarnessMonths: optionalNumber,
-  wingHarnessFlights: optionalNumber,
-  wingHarnessHours: optionalNumber,
+  wingMonths: optionalNumber,
+  wingFlights: optionalNumber,
+  wingHours: optionalNumber,
+  harnessMonths: optionalNumber,
+  harnessFlights: optionalNumber,
+  harnessHours: optionalNumber,
   reserveMonths: optionalNumber,
 });
 

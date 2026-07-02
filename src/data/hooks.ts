@@ -14,6 +14,8 @@ import {
   type Equipment,
   type Expense,
   type Flight,
+  type MaintenanceDefaults,
+  type MaintenanceRule,
   type UserSettings,
 } from '../types';
 import {
@@ -62,15 +64,27 @@ export function useSettings(): {
 }
 
 function mergeSettings(raw: Partial<UserSettings>): UserSettings {
+  const legacy = (
+    raw.maintenanceDefaults as
+      | (Partial<MaintenanceDefaults> & { wingHarness?: MaintenanceRule })
+      | undefined
+  )?.wingHarness;
+
   return {
     ...DEFAULT_SETTINGS,
     ...raw,
     pilot: { ...DEFAULT_SETTINGS.pilot, ...raw.pilot },
     defaults: { ...DEFAULT_SETTINGS.defaults, ...raw.defaults },
     maintenanceDefaults: {
-      wingHarness: {
-        ...DEFAULT_MAINTENANCE_DEFAULTS.wingHarness,
-        ...raw.maintenanceDefaults?.wingHarness,
+      wing: {
+        ...DEFAULT_MAINTENANCE_DEFAULTS.wing,
+        ...legacy,
+        ...raw.maintenanceDefaults?.wing,
+      },
+      harness: {
+        ...DEFAULT_MAINTENANCE_DEFAULTS.harness,
+        ...legacy,
+        ...raw.maintenanceDefaults?.harness,
       },
       reserve: {
         ...DEFAULT_MAINTENANCE_DEFAULTS.reserve,

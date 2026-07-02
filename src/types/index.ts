@@ -108,8 +108,10 @@ export interface DefaultSetup {
 }
 
 export interface MaintenanceDefaults {
-  /** Applies to paragliders and harnesses. */
-  wingHarness: MaintenanceRule;
+  /** Applies to paragliders. */
+  wing: MaintenanceRule;
+  /** Applies to harnesses. */
+  harness: MaintenanceRule;
   /** Applies to reserve parachutes (repacking only). */
   reserve: MaintenanceRule;
 }
@@ -123,7 +125,8 @@ export interface UserSettings {
 }
 
 export const DEFAULT_MAINTENANCE_DEFAULTS: MaintenanceDefaults = {
-  wingHarness: { months: 24, flights: 150, hours: 150 },
+  wing: { months: 24, flights: 150, hours: 150 },
+  harness: { months: 24, flights: 150, hours: 150 },
   reserve: { months: 12, flights: null, hours: null },
 };
 
@@ -161,7 +164,8 @@ export function defaultRuleForType(
   type: EquipmentType,
   defaults: MaintenanceDefaults,
 ): MaintenanceRule | null {
-  if (type === 'paraglider' || type === 'harness') return defaults.wingHarness;
+  if (type === 'paraglider') return defaults.wing;
+  if (type === 'harness') return defaults.harness;
   if (type === 'reserve') return defaults.reserve;
   return null;
 }

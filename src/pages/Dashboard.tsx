@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useEquipment, useExpenses, useFlights, useSettings } from '../data/hooks';
 import { computeDashboard, type MaintenanceItem } from '../domain/analytics';
-import { borrowedLabel, equipmentLabel, isBorrowed } from '../domain/equipment';
+import { equipmentLabel } from '../domain/equipment';
 import {
   Badge,
   EmptyState,
@@ -89,13 +89,8 @@ export function Dashboard() {
                 to={`/equipment/${m.equipment.id}`}
                 className="card flex items-center justify-between gap-2 transition hover:border-brand"
               >
-                <span className="flex flex-wrap items-center gap-2">
-                  <span className="font-medium">
-                    {equipmentLabel(m.equipment)}
-                  </span>
-                  {isBorrowed(m.equipment) && (
-                    <Badge tone="brand">{borrowedLabel(m.equipment)}</Badge>
-                  )}
+                <span className="font-medium">
+                  {equipmentLabel(m.equipment)}
                 </span>
                 <Badge tone="warn">No check/repack date</Badge>
               </Link>
@@ -122,17 +117,9 @@ export function Dashboard() {
         </div>
       </Section>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* 4. By wing */}
-        <Section title="Hours by wing">
-          <UsageList items={d.byWing} />
-        </Section>
-
-        {/* By harness */}
-        <Section title="Hours by harness">
-          <UsageList items={d.byHarness} />
-        </Section>
-      </div>
+      <Section title="Flights by wing">
+        <FlightsByWingList items={d.byWing} />
+      </Section>
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* 5. Top sites */}
@@ -239,12 +226,7 @@ function MaintenanceRow({ item }: { item: MaintenanceItem }) {
       className="card flex items-center justify-between gap-3 transition hover:border-brand"
     >
       <div className="min-w-0">
-        <div className="flex flex-wrap items-center gap-2">
-          <p className="font-semibold">{equipmentLabel(item.equipment)}</p>
-          {isBorrowed(item.equipment) && (
-            <Badge tone="brand">{borrowedLabel(item.equipment)}</Badge>
-          )}
-        </div>
+        <p className="font-semibold">{equipmentLabel(item.equipment)}</p>
         <p className="mt-0.5 text-xs text-muted">
           {item.result.reason}
           {item.result.daysRemaining != null &&
@@ -256,15 +238,15 @@ function MaintenanceRow({ item }: { item: MaintenanceItem }) {
   );
 }
 
-function UsageList({
+function FlightsByWingList({
   items,
 }: {
-  items: { id: string; label: string; flights: number; hours: number }[];
+  items: { id: string; label: string; flights: number }[];
 }) {
   if (items.length === 0) {
     return <p className="text-sm text-muted">No data yet.</p>;
   }
-  const max = Math.max(...items.map((i) => i.hours), 1);
+  const max = Math.max(...items.map((i) => i.flights), 1);
   return (
     <div className="card space-y-2.5">
       {items.map((i) => (
@@ -272,13 +254,13 @@ function UsageList({
           <div className="flex justify-between text-sm">
             <span className="truncate">{i.label}</span>
             <span className="shrink-0 tabular-nums text-muted">
-              {formatHours(i.hours)} · {i.flights}
+              {i.flights} {i.flights === 1 ? 'flight' : 'flights'}
             </span>
           </div>
           <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-surface-2">
             <div
               className="h-full rounded-full bg-brand"
-              style={{ width: `${(i.hours / max) * 100}%` }}
+              style={{ width: `${(i.flights / max) * 100}%` }}
             />
           </div>
         </div>
