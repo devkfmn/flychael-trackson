@@ -64,7 +64,7 @@ export function EquipmentList() {
       ) : grouped.length === 0 ? (
         <EmptyState
           title="No equipment yet"
-          hint="Add your wings, harnesses and reserves — or import your existing gear."
+          hint="Add your wings, harnesses and reserves — or restore a backup from Import/Export."
           action={
             <Link to="/equipment/new" className="btn-primary">
               Add equipment

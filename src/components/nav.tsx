@@ -26,6 +26,6 @@ export const NAV_ITEMS: NavItem[] = [
   { to: '/equipment', label: 'Equipment', icon: EquipmentIcon, primary: true },
   { to: '/maintenance', label: 'Maintenance', icon: WrenchIcon },
   { to: '/expenses', label: 'Expenses', icon: MoneyIcon },
-  { to: '/import', label: 'Import', icon: ImportIcon },
+  { to: '/import', label: 'Import/Export', icon: ImportIcon },
   { to: '/settings', label: 'Settings', icon: SettingsIcon, primary: true },
 ];

@@ -1,32 +1,75 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
-import { useSettings } from '../data/hooks';
-import { mapParafolio, type MappedImport } from '../features/import/parafolio';
-import { runImport } from '../features/import/runImport';
-import { Badge, PageHeader, Stat } from '../components/ui';
-import { AlertIcon } from '../components/icons';
+import {
+  useEquipment,
+  useExpenses,
+  useFlights,
+  useSettings,
+} from '../data/hooks';
+import { runTracksonImport } from '../features/import/runTracksonImport';
+import { parseTracksonExport } from '../features/import/tracksonImport';
+import {
+  buildTracksonExport,
+  downloadTracksonExport,
+  type TracksonExport,
+} from '../features/export/tracksonExport';
+import { PageHeader, Stat } from '../components/ui';
 import { formatSwissDate } from '../utils/dates';
 
 type Phase = 'idle' | 'preview' | 'importing' | 'done' | 'error';
 
+interface RestoreResult {
+  equipment: number;
+  flights: number;
+  expenses: number;
+}
+
 export function ImportPage() {
   const { user } = useAuth();
-  const { settings } = useSettings();
+  const { settings, loading: settingsLoading, exists: settingsExists } =
+    useSettings();
+  const { data: equipment, loading: equipmentLoading } = useEquipment();
+  const { data: flights, loading: flightsLoading } = useFlights();
+  const { data: expenses, loading: expensesLoading } = useExpenses();
   const [phase, setPhase] = useState<Phase>('idle');
-  const [mapped, setMapped] = useState<MappedImport | null>(null);
+  const [preview, setPreview] = useState<TracksonExport | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [confirmReimport, setConfirmReimport] = useState(false);
-  const [result, setResult] = useState<{ e: number; f: number } | null>(null);
+  const [confirmReplace, setConfirmReplace] = useState(false);
+  const [result, setResult] = useState<RestoreResult | null>(null);
 
-  const alreadyImported = settings.importedAt != null;
+  const hasExistingData =
+    equipment.length > 0 ||
+    flights.length > 0 ||
+    expenses.length > 0 ||
+    settingsExists;
+  const exportLoading =
+    settingsLoading ||
+    equipmentLoading ||
+    flightsLoading ||
+    expensesLoading;
+  const restoreBlocked = hasExistingData && !confirmReplace;
+
+  function resetToIdle() {
+    setPhase('idle');
+    setPreview(null);
+    setConfirmReplace(false);
+  }
+
+  function onExport() {
+    if (exportLoading) return;
+    downloadTracksonExport(
+      buildTracksonExport(settings, equipment, flights, expenses),
+    );
+  }
 
   async function onFile(file: File) {
     setError(null);
+    setConfirmReplace(false);
     try {
       const text = await file.text();
       const parsed = JSON.parse(text);
-      setMapped(mapParafolio(parsed));
+      setPreview(parseTracksonExport(parsed));
       setPhase('preview');
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not read file.');
@@ -34,15 +77,19 @@ export function ImportPage() {
     }
   }
 
-  async function doImport() {
-    if (!user || !mapped) return;
+  async function doRestore() {
+    if (!user || !preview || restoreBlocked) return;
     setPhase('importing');
     try {
-      const r = await runImport(user.uid, mapped);
-      setResult({ e: r.equipmentWritten, f: r.flightsWritten });
+      const r = await runTracksonImport(user.uid, preview);
+      setResult({
+        equipment: r.equipmentWritten,
+        flights: r.flightsWritten,
+        expenses: r.expensesWritten,
+      });
       setPhase('done');
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Import failed.');
+      setError(e instanceof Error ? e.message : 'Restore failed.');
       setPhase('error');
     }
   }
@@ -50,32 +97,14 @@ export function ImportPage() {
   return (
     <div className="mx-auto max-w-3xl">
       <PageHeader
-        title="Import"
-        subtitle="One-time import of your Parafolio export (parafolio_data.json)"
+        title="Import/Export"
+        subtitle="Download or restore a full Trackson backup"
       />
-
-      {alreadyImported && phase !== 'done' && (
-        <div className="card mb-5 border-warn/40 bg-warn/10">
-          <p className="text-sm font-medium text-warn">
-            You already imported on {formatSwissDate(
-              new Date(settings.importedAt as number).toISOString().slice(0, 10),
-            )}
-            .
-          </p>
-          <label className="mt-2 flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={confirmReimport}
-              onChange={(e) => setConfirmReimport(e.target.checked)}
-            />
-            I understand re-importing will add duplicate records.
-          </label>
-        </div>
-      )}
 
       {(phase === 'idle' || phase === 'error') && (
         <div className="card">
-          <label className="label">Select your parafolio_data.json file</label>
+          <h2 className="mb-3 font-semibold">Import</h2>
+          <label className="label">Select a Trackson backup file</label>
           <input
             type="file"
             accept=".json,application/json"
@@ -85,70 +114,65 @@ export function ImportPage() {
             }}
           />
           <p className="mt-2 text-xs text-muted">
-            Old app tags (e.g. Horus) are ignored. Pilot, paragliders, harnesses,
-            reserves and flights are normalized into your account.
+            Choose a trackson-export-*.json file. Restoring a backup fully
+            replaces existing data in your account.
           </p>
           {error && <p className="mt-3 text-sm text-danger">{error}</p>}
         </div>
       )}
 
-      {phase === 'preview' && mapped && (
+      {phase === 'preview' && preview && (
         <div className="space-y-5">
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <Stat label="Paragliders" value={mapped.stats.paragliders} />
-            <Stat label="Harnesses" value={mapped.stats.harnesses} />
-            <Stat label="Reserves" value={mapped.stats.reserves} />
-            <Stat label="Flights" value={mapped.stats.flights} />
+          <div className="grid grid-cols-3 gap-3">
+            <Stat label="Equipment" value={preview.equipment.length} />
+            <Stat label="Flights" value={preview.flights.length} />
+            <Stat label="Expenses" value={preview.expenses.length} />
           </div>
 
           <div className="card">
             <p className="text-sm">
               Pilot:{' '}
               <span className="font-semibold">
-                {mapped.pilot.name || '—'}
+                {preview.settings.pilot.name || '—'}
               </span>
-              {mapped.pilot.shvNr ? ` · SHV ${mapped.pilot.shvNr}` : ''}
+              {preview.settings.pilot.shvNr
+                ? ` · SHV ${preview.settings.pilot.shvNr}`
+                : ''}
             </p>
-            {mapped.stats.earliestDate && (
-              <p className="mt-1 text-xs text-muted">
-                Flights from {formatSwissDate(mapped.stats.earliestDate)} to{' '}
-                {formatSwissDate(mapped.stats.latestDate)}
-              </p>
+            <p className="mt-1 text-xs text-muted">
+              Exported on{' '}
+              {formatSwissDate(
+                new Date(preview.exportedAt).toISOString().slice(0, 10),
+              )}
+            </p>
+          </div>
+
+          <div className="card border-danger/40 bg-danger/10">
+            <p className="text-sm font-medium text-danger">
+              This will permanently replace all data in your account.
+            </p>
+            {hasExistingData && (
+              <label className="mt-2 flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={confirmReplace}
+                  onChange={(e) => setConfirmReplace(e.target.checked)}
+                />
+                I understand this will delete my current data and restore the
+                backup.
+              </label>
             )}
           </div>
 
-          {mapped.warnings.length > 0 && (
-            <div className="card">
-              <div className="mb-2 flex items-center gap-2">
-                <AlertIcon width={16} height={16} className="text-warn" />
-                <p className="text-sm font-semibold">
-                  {mapped.warnings.length} data quality warning
-                  {mapped.warnings.length > 1 ? 's' : ''}
-                </p>
-              </div>
-              <div className="max-h-60 space-y-1 overflow-auto">
-                {mapped.warnings.map((w, i) => (
-                  <div key={i} className="flex items-center justify-between gap-2 text-sm">
-                    <span className="text-muted">{w.message}</span>
-                    <Badge tone="warn">{w.kind}</Badge>
-                  </div>
-                ))}
-              </div>
-              <p className="mt-2 text-xs text-muted">
-                Warnings are informational — the import will still proceed.
-              </p>
-            </div>
-          )}
-
           <div className="flex gap-2">
             <button
-              onClick={() => void doImport()}
-              disabled={alreadyImported && !confirmReimport}
+              onClick={() => void doRestore()}
+              disabled={restoreBlocked}
               className="btn-primary flex-1"
             >
-              Import {mapped.stats.flights} flights & {mapped.equipment.length} items
+              Restore backup
             </button>
-            <button onClick={() => setPhase('idle')} className="btn-ghost">
+            <button onClick={resetToIdle} className="btn-ghost">
               Choose another file
             </button>
           </div>
@@ -157,15 +181,16 @@ export function ImportPage() {
 
       {phase === 'importing' && (
         <div className="card">
-          <p className="text-sm">Importing… this may take a moment.</p>
+          <p className="text-sm">Restoring… this may take a moment.</p>
         </div>
       )}
 
       {phase === 'done' && result && (
         <div className="card border-ok/40 bg-ok/10">
-          <p className="font-semibold text-ok">Import complete</p>
+          <p className="font-semibold text-ok">Restore complete</p>
           <p className="mt-1 text-sm text-muted">
-            Imported {result.e} equipment items and {result.f} flights.
+            Restored {result.equipment} equipment items, {result.flights}{' '}
+            flights, and {result.expenses} expenses.
           </p>
           <div className="mt-3 flex gap-2">
             <Link to="/" className="btn-primary">
@@ -177,6 +202,26 @@ export function ImportPage() {
           </div>
         </div>
       )}
+
+      <div className="card mt-8 space-y-4">
+        <h2 className="font-semibold">Export</h2>
+        <p className="text-sm text-muted">
+          Download a JSON backup of all settings, equipment, flights, and
+          expenses.
+        </p>
+        <p className="text-xs text-muted">
+          {equipment.length} equipment · {flights.length} flights ·{' '}
+          {expenses.length} expenses
+        </p>
+        <button
+          type="button"
+          className="btn-ghost"
+          disabled={exportLoading}
+          onClick={onExport}
+        >
+          Export all data
+        </button>
+      </div>
     </div>
   );
 }

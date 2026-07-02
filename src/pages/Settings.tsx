@@ -2,7 +2,12 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '../lib/auth';
-import { saveSettings, useEquipment, useSettings } from '../data/hooks';
+import {
+  deleteAllUserData,
+  saveSettings,
+  useEquipment,
+  useSettings,
+} from '../data/hooks';
 import { settingsFormSchema, type SettingsFormValues } from '../lib/schemas';
 import { selectableByType } from '../domain/equipment';
 import { equipmentLabel, equipmentStatusSuffix } from '../domain/equipment';
@@ -17,6 +22,13 @@ export function Settings() {
   const { data: equipment } = useEquipment();
   const { settings, loading } = useSettings();
   const [saved, setSaved] = useState(false);
+  const [confirmText, setConfirmText] = useState('');
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deleted, setDeleted] = useState(false);
+
+  const CONFIRM_PHRASE = 'Delete all data';
+  const canDelete = confirmText === CONFIRM_PHRASE && !deleting;
 
   const wings = selectableByType(equipment, 'paraglider');
   const harnesses = selectableByType(equipment, 'harness');
@@ -70,6 +82,23 @@ export function Settings() {
     await saveSettings(user.uid, next);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
+  }
+
+  async function onDeleteAll() {
+    if (!user || !canDelete) return;
+    setDeleting(true);
+    setDeleteError(null);
+    setDeleted(false);
+    try {
+      await deleteAllUserData(user.uid);
+      setConfirmText('');
+      setDeleted(true);
+      setTimeout(() => setDeleted(false), 3000);
+    } catch (e) {
+      setDeleteError(e instanceof Error ? e.message : 'Could not delete data.');
+    } finally {
+      setDeleting(false);
+    }
   }
 
   return (
@@ -177,6 +206,39 @@ export function Settings() {
           {saved && <span className="text-sm text-ok">Saved.</span>}
         </div>
       </form>
+
+      <div className="card mt-8 space-y-4 border-danger/40">
+        <h2 className="font-semibold text-danger">Danger zone</h2>
+        <p className="text-sm text-muted">
+          Permanently delete all flights, equipment, expenses, and settings.
+          This cannot be undone.
+        </p>
+        <Field
+          label={`Type "${CONFIRM_PHRASE}" to confirm`}
+        >
+          <input
+            className="input"
+            value={confirmText}
+            onChange={(e) => setConfirmText(e.target.value)}
+            placeholder={CONFIRM_PHRASE}
+            disabled={deleting}
+          />
+        </Field>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            className="btn-danger"
+            disabled={!canDelete}
+            onClick={() => void onDeleteAll()}
+          >
+            {deleting ? 'Deleting…' : 'Delete all data'}
+          </button>
+          {deleted && <span className="text-sm text-ok">All data deleted.</span>}
+        </div>
+        {deleteError && (
+          <p className="text-sm text-danger">{deleteError}</p>
+        )}
+      </div>
     </div>
   );
 }

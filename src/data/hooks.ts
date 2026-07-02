@@ -236,3 +236,5 @@ export async function updateExpense(
 export async function deleteExpense(uid: string, id: string): Promise<void> {
   await deleteDoc(doc(expensesCol(uid), id));
 }
+
+export { deleteAllUserData } from './deleteAllData';

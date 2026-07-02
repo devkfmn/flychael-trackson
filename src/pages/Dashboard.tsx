@@ -36,7 +36,7 @@ export function Dashboard() {
         <PageHeader title="Dashboard" subtitle="Welcome to Flychael Trackson" />
         <EmptyState
           title="Let's get set up"
-          hint="Import your existing Parafolio data, or add equipment and your first flight."
+          hint="Restore a backup from Import/Export, or add equipment and your first flight."
           action={
             <div className="flex gap-2">
               <Link to="/import" className="btn-primary">

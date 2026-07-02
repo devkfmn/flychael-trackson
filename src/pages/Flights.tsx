@@ -28,7 +28,7 @@ export function Flights() {
       ) : flights.length === 0 ? (
         <EmptyState
           title="No flights yet"
-          hint="Log your first flight or import your history."
+          hint="Log your first flight or restore a backup from Import/Export."
           action={
             <Link to="/flights/new" className="btn-primary">
               Add flight
