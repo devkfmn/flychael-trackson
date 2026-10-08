@@ -77,6 +77,29 @@ export function todayISO(now: Date = new Date()): string {
   return `${now.getFullYear()}-${pad2(now.getMonth() + 1)}-${pad2(now.getDate())}`;
 }
 
+const DEFAULT_ZONE = 'Europe/Zurich';
+
+/**
+ * Calendar date `yyyy-MM-dd` for `now` in an IANA time zone.
+ * MCP tools default to Europe/Zurich so logs match Swiss flying days.
+ */
+export function todayISOInTimeZone(
+  timeZone: string = DEFAULT_ZONE,
+  now: Date = new Date(),
+): string {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(now);
+  const year = parts.find((p) => p.type === 'year')?.value;
+  const month = parts.find((p) => p.type === 'month')?.value;
+  const day = parts.find((p) => p.type === 'day')?.value;
+  if (!year || !month || !day) return todayISO(now);
+  return `${year}-${month}-${day}`;
+}
+
 /** Whole calendar months between two ISO dates (b - a). Negative if b < a. */
 export function monthsBetween(aISO: string, bISO: string): number {
   const a = isoToUtc(aISO);

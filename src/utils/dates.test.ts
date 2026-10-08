@@ -6,6 +6,7 @@ import {
   monthsBetween,
   parseSwissDate,
   parseSwissDateTime,
+  todayISOInTimeZone,
 } from './dates';
 
 describe('parseSwissDate', () => {
@@ -81,5 +82,18 @@ describe('date math', () => {
   it('adds months across year boundaries', () => {
     expect(addMonthsISO('2023-11-15', 12)).toBe('2024-11-15');
     expect(addMonthsISO('2024-01-31', 1)).toBe('2024-03-02'); // JS overflow
+  });
+});
+
+describe('todayISOInTimeZone', () => {
+  it('uses Europe/Zurich calendar date around a UTC midnight that is still the previous evening in Zurich', () => {
+    // 2026-03-08 00:30 UTC is 2026-03-08 01:30 in Zurich (CET, UTC+1).
+    expect(todayISOInTimeZone('Europe/Zurich', new Date('2026-03-08T00:30:00Z'))).toBe(
+      '2026-03-08',
+    );
+    // 2026-03-07 23:30 UTC is 2026-03-08 00:30 in Zurich.
+    expect(todayISOInTimeZone('Europe/Zurich', new Date('2026-03-07T23:30:00Z'))).toBe(
+      '2026-03-08',
+    );
   });
 });

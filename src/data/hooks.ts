@@ -8,14 +8,12 @@ import {
   updateDoc,
 } from 'firebase/firestore';
 import { useAuth } from '../lib/auth';
+import { mergeSettings } from '../domain/settings';
 import {
-  DEFAULT_MAINTENANCE_DEFAULTS,
   DEFAULT_SETTINGS,
   type Equipment,
   type Expense,
   type Flight,
-  type MaintenanceDefaults,
-  type MaintenanceRule,
   type UserSettings,
 } from '../types';
 import {
@@ -61,37 +59,6 @@ export function useSettings(): {
   }, [user]);
 
   return { settings, loading, exists };
-}
-
-function mergeSettings(raw: Partial<UserSettings>): UserSettings {
-  const legacy = (
-    raw.maintenanceDefaults as
-      | (Partial<MaintenanceDefaults> & { wingHarness?: MaintenanceRule })
-      | undefined
-  )?.wingHarness;
-
-  return {
-    ...DEFAULT_SETTINGS,
-    ...raw,
-    pilot: { ...DEFAULT_SETTINGS.pilot, ...raw.pilot },
-    defaults: { ...DEFAULT_SETTINGS.defaults, ...raw.defaults },
-    maintenanceDefaults: {
-      wing: {
-        ...DEFAULT_MAINTENANCE_DEFAULTS.wing,
-        ...legacy,
-        ...raw.maintenanceDefaults?.wing,
-      },
-      harness: {
-        ...DEFAULT_MAINTENANCE_DEFAULTS.harness,
-        ...legacy,
-        ...raw.maintenanceDefaults?.harness,
-      },
-      reserve: {
-        ...DEFAULT_MAINTENANCE_DEFAULTS.reserve,
-        ...raw.maintenanceDefaults?.reserve,
-      },
-    },
-  };
 }
 
 export function useEquipment(): ListState<Equipment> {

@@ -10,12 +10,15 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc -b --noEmit",
+    "lint": "tsc -b --noEmit",
     "icons": "node scripts/generate-pwa-icons.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
+    "@modelcontextprotocol/sdk": "^1.32.1",
     "date-fns": "^4.4.0",
     "firebase": "^12.15.0",
+    "firebase-admin": "^14.5.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-hook-form": "^7.80.0",
@@ -24,8 +27,10 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.1",
+    "@types/node": "^26.6.4",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
+    "@vercel/node": "^23.0.0",
     "@vitejs/plugin-react": "^6.0.3",
     "sharp": "^0.35.2",
     "tailwindcss": "^4.3.1",
