@@ -1,11 +1,11 @@
-import type { Equipment, Expense, Flight, UserSettings } from '../types';
-import { todayISO, yearOf } from '../utils/dates';
+import type { Equipment, Expense, Flight, UserSettings } from '../types/index.js';
+import { todayISO, yearOf } from '../utils/dates.js';
 import {
   equipmentLabel,
   equipmentMap,
   maintenanceFor,
-} from './equipment';
-import type { MaintenanceResult } from './maintenance';
+} from './equipment.js';
+import type { MaintenanceResult } from './maintenance.js';
 
 export interface UsageBucket {
   id: string;

@@ -1,5 +1,5 @@
-import type { EquipmentType, Flight, MaintenanceRule } from '../types';
-import { addMonthsISO, daysBetween, monthsBetween } from '../utils/dates';
+import type { EquipmentType, Flight, MaintenanceRule } from '../types/index.js';
+import { addMonthsISO, daysBetween, monthsBetween } from '../utils/dates.js';
 
 export type MaintenanceStatus = 'ok' | 'dueSoon' | 'overdue' | 'unknown';
 

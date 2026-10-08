@@ -1,18 +1,18 @@
-import { computeDashboard } from '../domain/analytics';
-import { equipmentLabel, isSelectableForFlight } from '../domain/equipment';
-import { mergeSettings } from '../domain/settings';
-import { yearOf, todayISOInTimeZone } from '../utils/dates';
+import { computeDashboard } from '../domain/analytics.js';
+import { equipmentLabel, isSelectableForFlight } from '../domain/equipment.js';
+import { mergeSettings } from '../domain/settings.js';
+import { yearOf, todayISOInTimeZone } from '../utils/dates.js';
 import type {
   Equipment,
   Expense,
   Flight,
   MaintenanceRule,
   UserSettings,
-} from '../types';
-import { DEFAULT_MAINTENANCE_DEFAULTS } from '../types';
-import { NotFoundError, ToolInputError, parseArgs } from './errors';
+} from '../types/index.js';
+import { DEFAULT_MAINTENANCE_DEFAULTS } from '../types/index.js';
+import { NotFoundError, ToolInputError, parseArgs } from './errors.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
-import { errorResult, jsonResult } from './result';
+import { errorResult, jsonResult } from './result.js';
 import {
   createEquipmentSchema,
   createExpenseSchema,
@@ -37,8 +37,8 @@ import {
   type UpdateExpenseInput,
   type UpdateFlightInput,
   type UpdateProfileInput,
-} from './schemas';
-import type { TracksonStore } from './store';
+} from './schemas.js';
+import type { TracksonStore } from './store.js';
 
 const TIMEZONE = 'Europe/Zurich';
 const DEFAULT_LIMIT = 50;

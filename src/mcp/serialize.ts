@@ -1,4 +1,4 @@
-import { mergeSettings } from '../domain/settings';
+import { mergeSettings } from '../domain/settings.js';
 import type {
   Equipment,
   Expense,
@@ -7,8 +7,8 @@ import type {
   MaintenanceRule,
   TrackMeta,
   UserSettings,
-} from '../types';
-import { timestampToMillis, timestampToMillisOr } from './timestamps';
+} from '../types/index.js';
+import { timestampToMillis, timestampToMillisOr } from './timestamps.js';
 
 function asString(value: unknown, fallback = ''): string {
   return typeof value === 'string' ? value : fallback;
