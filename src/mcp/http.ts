@@ -1,7 +1,7 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
-import { authorizeBearer } from './auth';
-import { createTracksonMcpServer } from './server';
+import { authorizeBearer } from './auth.js';
+import { createTracksonMcpServer } from './server.js';
 
 const CORS_HEADERS: Record<string, string> = {
   'Access-Control-Allow-Origin': '*',

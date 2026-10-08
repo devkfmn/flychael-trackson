@@ -4,10 +4,10 @@ import {
   type EquipmentType,
   type MaintenanceRule,
   type UserSettings,
-} from '../types';
-import { computeMaintenance, type MaintenanceResult } from './maintenance';
-import type { Flight } from '../types';
-import { todayISO } from '../utils/dates';
+} from '../types/index.js';
+import { computeMaintenance, type MaintenanceResult } from './maintenance.js';
+import type { Flight } from '../types/index.js';
+import { todayISO } from '../utils/dates.js';
 
 export function equipmentLabel(eq: Equipment): string {
   const main = [eq.producer, eq.model].filter(Boolean).join(' ').trim();

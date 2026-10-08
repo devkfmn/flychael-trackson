@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { handleMcpHttp } from '../src/mcp/http';
+import { handleMcpHttp } from '../src/mcp/http.js';
 
 export const config = {
   maxDuration: 60,

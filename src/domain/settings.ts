@@ -4,7 +4,7 @@ import {
   type MaintenanceDefaults,
   type MaintenanceRule,
   type UserSettings,
-} from '../types';
+} from '../types/index.js';
 
 /**
  * Merge a raw Firestore settings document with app defaults.

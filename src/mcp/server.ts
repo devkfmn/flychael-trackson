@@ -1,5 +1,5 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { createHandlers, type HandlerContext } from './handlers';
+import { createHandlers, type HandlerContext } from './handlers.js';
 import {
   createEquipmentSchema,
   createExpenseSchema,
@@ -15,8 +15,8 @@ import {
   updateFlightSchema,
   emptyObjectSchema,
   updateProfileSchema,
-} from './schemas';
-import { createFirestoreStore, type TracksonStore } from './store';
+} from './schemas.js';
+import { createFirestoreStore, type TracksonStore } from './store.js';
 
 export function createTracksonMcpServer(
   store: TracksonStore = createFirestoreStore(),

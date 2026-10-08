@@ -1,7 +1,7 @@
 import { cert, getApps, initializeApp } from 'firebase-admin/app';
 import { getFirestore, type Firestore } from 'firebase-admin/firestore';
-import { stripUndefined } from '../data/stripUndefined';
-import type { Equipment, Expense, Flight, UserSettings } from '../types';
+import { stripUndefined } from '../data/stripUndefined.js';
+import type { Equipment, Expense, Flight, UserSettings } from '../types/index.js';
 
 type StoredEquipment = Omit<Equipment, 'id'>;
 type StoredExpense = Omit<Expense, 'id'>;
@@ -11,7 +11,7 @@ import {
   expenseFromDoc,
   flightFromDoc,
   settingsFromDoc,
-} from './serialize';
+} from './serialize.js';
 
 export interface TracksonStore {
   listFlights(): Promise<Flight[]>;
