@@ -23,7 +23,7 @@ export function Layout() {
   return (
     <div className="mx-auto flex min-h-full max-w-6xl">
       {/* Desktop sidebar */}
-      <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-border bg-surface/60 p-4 md:flex">
+      <aside className="sticky top-0 hidden h-full min-h-0 w-60 shrink-0 flex-col border-r border-border bg-surface/60 p-4 md:flex">
         <div className="px-2 py-2">
           <Brand />
         </div>
