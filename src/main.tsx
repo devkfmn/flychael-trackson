@@ -1,7 +1,19 @@
-import { StrictMode } from 'react';
+import { StrictMode, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
+import { AppUpdateBanner, AppUpdateProvider } from './components/AppUpdate';
 import { ConfigMissing } from './ConfigMissing';
+
+function Root({ children }: { children: ReactNode }) {
+  return (
+    <AppUpdateProvider>
+      <div className="flex min-h-full flex-col">
+        <AppUpdateBanner />
+        <div className="min-h-0 flex-1">{children}</div>
+      </div>
+    </AppUpdateProvider>
+  );
+}
 
 async function bootstrap() {
   const rootEl = document.getElementById('root');
@@ -12,7 +24,9 @@ async function bootstrap() {
   if (!import.meta.env.VITE_FIREBASE_API_KEY) {
     root.render(
       <StrictMode>
-        <ConfigMissing />
+        <Root>
+          <ConfigMissing />
+        </Root>
       </StrictMode>,
     );
     return;
@@ -26,11 +40,13 @@ async function bootstrap() {
 
   root.render(
     <StrictMode>
-      <BrowserRouter>
-        <AuthProvider>
-          <App />
-        </AuthProvider>
-      </BrowserRouter>
+      <Root>
+        <BrowserRouter>
+          <AuthProvider>
+            <App />
+          </AuthProvider>
+        </BrowserRouter>
+      </Root>
     </StrictMode>,
   );
 }

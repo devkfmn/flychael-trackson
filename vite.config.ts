@@ -1,9 +1,58 @@
-import { defineConfig } from 'vitest/config';
+import { defineConfig, type Plugin } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath, URL } from 'node:url';
+import type { IncomingMessage, ServerResponse } from 'node:http';
+
+const APP_BUILD_ID =
+  process.env.VERCEL_GIT_COMMIT_SHA?.trim() ||
+  process.env.VITE_APP_BUILD_ID?.trim() ||
+  'dev';
+
+function appBuildIdPlugin(buildId: string): Plugin {
+  const body = `${JSON.stringify({ buildId })}\n`;
+
+  function serveVersion(
+    req: IncomingMessage,
+    res: ServerResponse,
+    next: () => void,
+  ) {
+    const path = req.url?.split('?')[0];
+    if (path !== '/version.json') {
+      next();
+      return;
+    }
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-store, max-age=0, must-revalidate');
+    res.end(body);
+  }
+
+  return {
+    name: 'app-build-id',
+    config() {
+      return {
+        define: {
+          __APP_BUILD_ID__: JSON.stringify(buildId),
+        },
+      };
+    },
+    configureServer(server) {
+      server.middlewares.use(serveVersion);
+    },
+    configurePreviewServer(server) {
+      server.middlewares.use(serveVersion);
+    },
+    generateBundle() {
+      this.emitFile({
+        type: 'asset',
+        fileName: 'version.json',
+        source: body,
+      });
+    },
+  };
+}
 
 const authProxy = {
   '/__/auth': {
@@ -43,6 +92,7 @@ export default defineConfig(({ command }) => {
     plugins: [
       react(),
       tailwindcss(),
+      appBuildIdPlugin(APP_BUILD_ID),
       VitePWA({
         registerType: 'autoUpdate',
         includeAssets: ['favicon.png', 'apple-touch-icon.png', 'logo.png'],
@@ -67,8 +117,15 @@ export default defineConfig(({ command }) => {
           ],
         },
         workbox: {
-          navigateFallbackDenylist: [/^\/__/, /^\/api\//],
+          navigateFallbackDenylist: [/^\/__/, /^\/api\//, /^\/version\.json$/],
           globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
+          globIgnores: ['**/version.json'],
+          runtimeCaching: [
+            {
+              urlPattern: /\/version\.json(?:\?.*)?$/,
+              handler: 'NetworkOnly',
+            },
+          ],
         },
       }),
     ],
