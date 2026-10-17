@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../lib/auth';
 
 export function Login() {
-  const { signInWithGoogle } = useAuth();
+  const { signInWithGoogle, authError } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -40,8 +40,8 @@ export function Login() {
           {busy ? 'Signing in…' : 'Continue with Google'}
         </button>
 
-        {error && (
-          <p className="mt-4 text-sm text-danger">{error}</p>
+        {(error || authError) && (
+          <p className="mt-4 text-sm text-danger">{error ?? authError}</p>
         )}
       </div>
     </div>

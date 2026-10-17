@@ -5,6 +5,7 @@ import { EmptyState, PageHeader, Spinner } from '../components/ui';
 import { AddIcon } from '../components/icons';
 import { formatAirtime } from '../utils/format';
 import { formatSwissDate } from '../utils/dates';
+import type { Equipment, Flight } from '../types';
 
 export function Flights() {
   const { data: flights, loading } = useFlights();
@@ -37,41 +38,71 @@ export function Flights() {
         />
       ) : (
         <div className="space-y-2">
-          {flights.map((f) => {
-            const wing = f.paragliderId ? byId.get(f.paragliderId) : null;
-            return (
-              <Link
-                key={f.id}
-                to={`/flights/${f.id}`}
-                className="card flex items-center justify-between gap-3 transition hover:border-brand"
-              >
-                <div className="min-w-0">
-                  <p className="font-semibold">
-                    {f.takeoff} <span className="text-muted">→</span>{' '}
-                    {f.landing}
-                  </p>
-                  <p className="mt-0.5 truncate text-xs text-muted">
-                    {formatSwissDate(f.dateISO)}
-                    {f.time ? ` · ${f.time}` : ''}
-                    {wing
-                      ? ` · ${equipmentLabel(wing)}${isBorrowed(wing) ? ' (borrowed)' : ''}`
-                      : ''}
-                    {f.source === 'igc' ? ' · IGC' : ''}
-                  </p>
-                </div>
-                <div className="shrink-0 text-right">
-                  <p className="font-semibold tabular-nums">
-                    {formatAirtime(f.airtimeMinutes)}
-                  </p>
-                  {f.distanceKm != null && (
-                    <p className="text-xs text-muted">{f.distanceKm} km</p>
-                  )}
-                </div>
-              </Link>
-            );
-          })}
+          {flights.map((f, index) => (
+            <FlightRow
+              key={f.id}
+              flight={f}
+              flightNumber={flights.length - index}
+              wing={f.paragliderId ? byId.get(f.paragliderId) : undefined}
+              harness={f.harnessId ? byId.get(f.harnessId) : undefined}
+            />
+          ))}
         </div>
       )}
     </div>
   );
+}
+
+function FlightRow({
+  flight,
+  flightNumber,
+  wing,
+  harness,
+}: {
+  flight: Flight;
+  flightNumber: number;
+  wing?: Equipment;
+  harness?: Equipment;
+}) {
+  const gear = [gearName(wing), gearName(harness)].filter(Boolean).join(' · ');
+  const meta = [
+    formatSwissDate(flight.dateISO),
+    flight.time,
+    formatAirtime(flight.airtimeMinutes),
+    flight.distanceKm != null ? `${flight.distanceKm} km` : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
+  return (
+    <Link
+      to={`/flights/${flight.id}`}
+      className="@container card flex items-center gap-4 transition hover:border-brand"
+    >
+      <span className="w-13 shrink-0 text-right text-base font-bold tabular-nums">
+        #{flightNumber}
+      </span>
+      <div className="grid min-w-0 flex-1 grid-cols-1 gap-x-4 gap-y-0.5 @[40rem]:grid-cols-2">
+        <p className="text-xs text-muted">{meta}</p>
+        <p className="text-left text-xs text-muted @[40rem]:col-start-1 @[40rem]:row-start-2">
+          {flight.takeoff} <span>→</span> {flight.landing}
+        </p>
+        {gear && (
+          <p className="truncate text-xs text-muted @[40rem]:col-start-2 @[40rem]:row-start-1 @[40rem]:text-right">
+            {gear}
+          </p>
+        )}
+        {flight.comments && (
+          <p className="line-clamp-2 text-xs text-muted @[40rem]:col-start-2 @[40rem]:row-start-2 @[40rem]:text-right">
+            {flight.comments}
+          </p>
+        )}
+      </div>
+    </Link>
+  );
+}
+
+function gearName(item: Equipment | undefined): string | null {
+  if (!item) return null;
+  return `${equipmentLabel(item)}${isBorrowed(item) ? ' (borrowed)' : ''}`;
 }

@@ -35,7 +35,14 @@
     "providers": {
       "googleSignIn": {
         "oAuthBrandDisplayName": "Flychael Trackson",
-        "supportEmail": "dev@kfmn.io"
+        "supportEmail": "dev@kfmn.io",
+        "authorizedRedirectUris": [
+          "https://flychael-trackson.firebaseapp.com/__/auth/handler",
+          "https://flychael-trackson.web.app/__/auth/handler",
+          "https://flychael-trackson.vercel.app/__/auth/handler",
+          "http://localhost:5173/__/auth/handler",
+          "https://localhost:5173/__/auth/handler"
+        ]
       }
     }
   }

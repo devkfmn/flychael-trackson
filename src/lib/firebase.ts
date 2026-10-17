@@ -6,9 +6,21 @@ import {
   persistentMultipleTabManager,
 } from 'firebase/firestore';
 
+const configuredAuthDomain = import.meta.env.VITE_FIREBASE_AUTH_DOMAIN;
+
+// The Cursor browser blocks third-party storage, so Firebase's auth helper on
+// firebaseapp.com cannot read the redirect session. In dev, Vite proxies
+// /__/auth onto this host and authDomain must match that host.
+function resolveAuthDomain(): string | undefined {
+  if (import.meta.env.DEV && typeof window !== 'undefined') {
+    return window.location.host;
+  }
+  return configuredAuthDomain;
+}
+
 const firebaseConfig: FirebaseOptions = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  authDomain: resolveAuthDomain(),
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,

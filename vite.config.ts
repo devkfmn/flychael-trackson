@@ -2,6 +2,7 @@ import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
+import { readFileSync } from 'node:fs';
 import { fileURLToPath, URL } from 'node:url';
 
 export default defineConfig({
@@ -40,6 +41,26 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
+    },
+  },
+  server: {
+    port: 5173,
+    strictPort: true,
+    https: {
+      key: readFileSync(fileURLToPath(new URL('./certs/dev-key.pem', import.meta.url))),
+      cert: readFileSync(fileURLToPath(new URL('./certs/dev-cert.pem', import.meta.url))),
+    },
+    proxy: {
+      '/__/auth': {
+        target: 'https://flychael-trackson.firebaseapp.com',
+        changeOrigin: true,
+        secure: true,
+      },
+      '/__/firebase': {
+        target: 'https://flychael-trackson.firebaseapp.com',
+        changeOrigin: true,
+        secure: true,
+      },
     },
   },
   test: {
