@@ -40,6 +40,12 @@ export function isSelectableForFlight(eq: Equipment): boolean {
   return eq.status !== 'sold';
 }
 
+/** Treat empty string the same as a missing id. */
+export function presentId(id: string | null | undefined): string | null {
+  if (id == null || id === '') return null;
+  return id;
+}
+
 export function selectableByType(
   equipment: Equipment[],
   type: EquipmentType,
@@ -47,6 +53,74 @@ export function selectableByType(
   return equipment
     .filter((e) => e.type === type && isSelectableForFlight(e))
     .sort((a, b) => equipmentLabel(a).localeCompare(equipmentLabel(b)));
+}
+
+/**
+ * Select options for a flight gear field. Sold items stay hidden unless the
+ * flight (or current form value) still references them — same for any other
+ * non-selectable status that is already stored on the flight.
+ */
+export function gearOptions(
+  equipment: Equipment[],
+  type: EquipmentType,
+  ...referencedIds: Array<string | null | undefined>
+): Equipment[] {
+  const list = selectableByType(equipment, type);
+  const extras: Equipment[] = [];
+  for (const raw of referencedIds) {
+    const id = presentId(raw);
+    if (!id) continue;
+    if (list.some((e) => e.id === id) || extras.some((e) => e.id === id)) continue;
+    const cur = equipment.find((e) => e.id === id && e.type === type);
+    if (cur) extras.push(cur);
+  }
+  return extras.length > 0 ? [...extras, ...list] : list;
+}
+
+/**
+ * Pick a gear id that exists in `options`. Empty string is missing. If the
+ * preferred id is not among the options, fall back to `fallback` when that id
+ * is available.
+ */
+export function resolveGearId(
+  preferred: string | null | undefined,
+  options: Equipment[],
+  fallback: string | null | undefined = null,
+): string | null {
+  const ids = new Set(options.map((e) => e.id));
+  const preferredId = presentId(preferred);
+  if (preferredId && ids.has(preferredId)) return preferredId;
+  const fallbackId = presentId(fallback);
+  if (fallbackId && ids.has(fallbackId)) return fallbackId;
+  return null;
+}
+
+/**
+ * Decide whether to push a stored gear id back into the form after options
+ * arrive. Never overwrites a user-chosen value; only fills an empty field
+ * once the referenced option is actually listed.
+ */
+export function restoreGearFormValue(input: {
+  current: string | null | undefined;
+  initial: string | null | undefined;
+  options: Equipment[];
+  alreadyRestored: boolean;
+}): { value: string | null; restored: boolean } {
+  if (input.alreadyRestored) {
+    return { value: presentId(input.current), restored: true };
+  }
+  const initialId = presentId(input.initial);
+  const currentId = presentId(input.current);
+  if (initialId && !input.options.some((e) => e.id === initialId)) {
+    return { value: currentId, restored: false };
+  }
+  if (currentId) {
+    return { value: currentId, restored: true };
+  }
+  if (initialId) {
+    return { value: initialId, restored: true };
+  }
+  return { value: null, restored: true };
 }
 
 export function equipmentMap(equipment: Equipment[]): Map<string, Equipment> {

@@ -2,7 +2,8 @@ import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
 import { createFlight, useEquipment, useFlights, useSettings } from '../data/hooks';
-import { computePrefill } from '../domain/prefill';
+import { selectableByType } from '../domain/equipment';
+import { computePrefill, resolvePrefillGearField } from '../domain/prefill';
 import type { FlightFormValues } from '../lib/schemas';
 import type { StoredFlight } from '../data/collections';
 import { FlightForm, type FlightSubmit } from '../components/FlightForm';
@@ -18,10 +19,28 @@ export function AddFlight() {
 
   const today = todayISO();
 
-  const prefill = useMemo(
+  const rawPrefill = useMemo(
     () => computePrefill(flights, today, settings.defaults),
     [flights, today, settings.defaults],
   );
+
+  const prefill = useMemo(() => {
+    const wingIds = selectableByType(equipment, 'paraglider').map((e) => e.id);
+    const harnessIds = selectableByType(equipment, 'harness').map((e) => e.id);
+    return {
+      ...rawPrefill,
+      paragliderId: resolvePrefillGearField(
+        rawPrefill.paragliderId,
+        settings.defaults.paragliderId,
+        wingIds,
+      ),
+      harnessId: resolvePrefillGearField(
+        rawPrefill.harnessId,
+        settings.defaults.harnessId,
+        harnessIds,
+      ),
+    };
+  }, [rawPrefill, equipment, settings.defaults]);
 
   const initial = useMemo<FlightFormValues>(
     () => ({
