@@ -42,21 +42,29 @@ export const SOURCE_LABELS: Record<PrefillSource, string> = {
   none: 'No suggestion',
 };
 
+/** Empty string is stored/imported as "missing", same as null. */
+export function presentPrefillValue(
+  value: string | null | undefined,
+): string | null {
+  if (value == null || value === '') return null;
+  return value;
+}
+
 function setupOf(f: PrefillFlight): Setup {
   return {
-    paragliderId: f.paragliderId,
-    harnessId: f.harnessId,
-    takeoff: f.takeoff,
-    landing: f.landing,
+    paragliderId: presentPrefillValue(f.paragliderId),
+    harnessId: presentPrefillValue(f.harnessId),
+    takeoff: presentPrefillValue(f.takeoff),
+    landing: presentPrefillValue(f.landing),
   };
 }
 
 function defaultSetup(d: DefaultSetup): Setup {
   return {
-    paragliderId: d.paragliderId,
-    harnessId: d.harnessId,
-    takeoff: d.takeoff,
-    landing: d.landing,
+    paragliderId: presentPrefillValue(d.paragliderId),
+    harnessId: presentPrefillValue(d.harnessId),
+    takeoff: presentPrefillValue(d.takeoff),
+    landing: presentPrefillValue(d.landing),
   };
 }
 
@@ -153,8 +161,10 @@ export function computePrefill(
   const dflt = defaultSetup(defaults);
 
   const field = (key: keyof Setup): PrefillField => {
-    if (base[key] != null) return { value: base[key], source };
-    if (dflt[key] != null) return { value: dflt[key], source: 'default' };
+    const fromBase = presentPrefillValue(base[key]);
+    if (fromBase != null) return { value: fromBase, source };
+    const fromDefault = presentPrefillValue(dflt[key]);
+    if (fromDefault != null) return { value: fromDefault, source: 'default' };
     return { value: null, source: 'none' };
   };
 
@@ -166,4 +176,25 @@ export function computePrefill(
     tripModeActive,
     primarySource: source,
   };
+}
+
+/**
+ * Keep a prefilled gear id only when it is actually selectable. Otherwise
+ * fall back to the user's default (if that id is in the options), else none.
+ */
+export function resolvePrefillGearField(
+  field: PrefillField,
+  fallbackDefault: string | null | undefined,
+  optionIds: Iterable<string>,
+): PrefillField {
+  const ids = optionIds instanceof Set ? optionIds : new Set(optionIds);
+  const preferredId = presentPrefillValue(field.value);
+  if (preferredId && ids.has(preferredId)) {
+    return { value: preferredId, source: field.source };
+  }
+  const fallbackId = presentPrefillValue(fallbackDefault);
+  if (fallbackId && ids.has(fallbackId)) {
+    return { value: fallbackId, source: 'default' };
+  }
+  return { value: null, source: 'none' };
 }

@@ -1,12 +1,13 @@
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useEffect, useRef, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { flightFormSchema, type FlightFormValues } from '../lib/schemas';
 import type { Equipment, IgcMeta, TrackMeta } from '../types';
 import {
-  selectableByType,
   equipmentLabel,
   equipmentStatusSuffix,
+  gearOptions,
+  restoreGearFormValue,
 } from '../domain/equipment';
 import {
   SOURCE_LABELS,
@@ -35,20 +36,6 @@ interface FlightFormProps {
   initialTrack?: TrackMeta | null;
 }
 
-/** Build a select option list including the current value even if sold. */
-function gearOptions(
-  equipment: Equipment[],
-  type: 'paraglider' | 'harness',
-  currentId: string | null,
-): Equipment[] {
-  const list = selectableByType(equipment, type);
-  if (currentId && !list.some((e) => e.id === currentId)) {
-    const cur = equipment.find((e) => e.id === currentId);
-    if (cur) return [cur, ...list];
-  }
-  return list;
-}
-
 export function FlightForm({
   equipment,
   initial,
@@ -64,7 +51,9 @@ export function FlightForm({
     register,
     handleSubmit,
     setValue,
+    getValues,
     watch,
+    control,
     formState: { errors },
   } = useForm<FlightFormValues>({
     resolver: zodResolver(flightFormSchema),
@@ -75,12 +64,43 @@ export function FlightForm({
   const [track, setTrack] = useState<TrackMeta | null>(initialTrack);
   const [igcInfo, setIgcInfo] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const restoredGear = useRef({ paragliderId: false, harnessId: false });
 
   const paragliderId = watch('paragliderId') ?? null;
   const harnessId = watch('harnessId') ?? null;
 
-  const wings = gearOptions(equipment, 'paraglider', paragliderId);
-  const harnesses = gearOptions(equipment, 'harness', harnessId);
+  const wings = gearOptions(
+    equipment,
+    'paraglider',
+    paragliderId,
+    initial.paragliderId,
+  );
+  const harnesses = gearOptions(
+    equipment,
+    'harness',
+    harnessId,
+    initial.harnessId,
+  );
+
+  useEffect(() => {
+    function syncGear(
+      field: 'paragliderId' | 'harnessId',
+      type: 'paraglider' | 'harness',
+    ) {
+      const decision = restoreGearFormValue({
+        current: getValues(field),
+        initial: initial[field],
+        options: gearOptions(equipment, type, getValues(field), initial[field]),
+        alreadyRestored: restoredGear.current[field],
+      });
+      restoredGear.current[field] = decision.restored;
+      if ((getValues(field) ?? '') !== (decision.value ?? '')) {
+        setValue(field, decision.value ?? '', { shouldDirty: false });
+      }
+    }
+    syncGear('paragliderId', 'paraglider');
+    syncGear('harnessId', 'harness');
+  }, [equipment, initial.paragliderId, initial.harnessId, getValues, setValue]);
 
   async function handleIgc(file: File) {
     const text = await file.text();
@@ -174,15 +194,28 @@ export function FlightForm({
 
       <div>
         <Field label="Paraglider">
-          <select className="input" {...register('paragliderId')}>
-            <option value="">— Select wing —</option>
-            {wings.map((w) => (
-              <option key={w.id} value={w.id}>
-                {equipmentLabel(w)}
-                {equipmentStatusSuffix(w)}
-              </option>
-            ))}
-          </select>
+          <Controller
+            name="paragliderId"
+            control={control}
+            render={({ field }) => (
+              <select
+                className="input"
+                name={field.name}
+                ref={field.ref}
+                value={field.value ?? ''}
+                onBlur={field.onBlur}
+                onChange={field.onChange}
+              >
+                <option value="">— Select wing —</option>
+                {wings.map((w) => (
+                  <option key={w.id} value={w.id}>
+                    {equipmentLabel(w)}
+                    {equipmentStatusSuffix(w)}
+                  </option>
+                ))}
+              </select>
+            )}
+          />
         </Field>
         {prefill && (
           <Chip
@@ -195,15 +228,28 @@ export function FlightForm({
 
       <div>
         <Field label="Harness">
-          <select className="input" {...register('harnessId')}>
-            <option value="">— Select harness —</option>
-            {harnesses.map((h) => (
-              <option key={h.id} value={h.id}>
-                {equipmentLabel(h)}
-                {equipmentStatusSuffix(h)}
-              </option>
-            ))}
-          </select>
+          <Controller
+            name="harnessId"
+            control={control}
+            render={({ field }) => (
+              <select
+                className="input"
+                name={field.name}
+                ref={field.ref}
+                value={field.value ?? ''}
+                onBlur={field.onBlur}
+                onChange={field.onChange}
+              >
+                <option value="">— Select harness —</option>
+                {harnesses.map((h) => (
+                  <option key={h.id} value={h.id}>
+                    {equipmentLabel(h)}
+                    {equipmentStatusSuffix(h)}
+                  </option>
+                ))}
+              </select>
+            )}
+          />
         </Field>
         {prefill && (
           <Chip

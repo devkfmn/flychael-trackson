@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { computePrefill, type PrefillFlight } from './prefill';
+import {
+  computePrefill,
+  resolvePrefillGearField,
+  type PrefillFlight,
+} from './prefill';
 import type { DefaultSetup } from '../types';
 
 function f(
@@ -94,5 +98,55 @@ describe('computePrefill', () => {
     const r = computePrefill(flights, '2024-07-11', homeDefaults);
     expect(r.tripModeActive).toBe(false);
     expect(r.primarySource).toBe('last-flying-day');
+  });
+
+  it('treats empty strings as missing and falls back to defaults', () => {
+    const flights = [
+      f('2024-07-10', '10:00', '', '', '', 'LandX'),
+    ];
+    const r = computePrefill(flights, '2024-07-10', homeDefaults);
+    expect(r.primarySource).toBe('same-day');
+    expect(r.paragliderId).toEqual({ value: 'w-home', source: 'default' });
+    expect(r.harnessId).toEqual({ value: 'h-home', source: 'default' });
+    expect(r.takeoff).toEqual({ value: 'Home', source: 'default' });
+    expect(r.landing).toEqual({ value: 'LandX', source: 'same-day' });
+  });
+});
+
+describe('resolvePrefillGearField', () => {
+  it('keeps a prefilled id that is still selectable', () => {
+    const field = resolvePrefillGearField(
+      { value: 'w-trip', source: 'last-flying-day' },
+      'w-home',
+      ['w-trip', 'w-home'],
+    );
+    expect(field).toEqual({ value: 'w-trip', source: 'last-flying-day' });
+  });
+
+  it('falls back to the default when the prefilled id is not in options', () => {
+    const field = resolvePrefillGearField(
+      { value: 'w-sold', source: 'same-day' },
+      'w-home',
+      ['w-home', 'w-other'],
+    );
+    expect(field).toEqual({ value: 'w-home', source: 'default' });
+  });
+
+  it('treats an empty prefilled id as missing', () => {
+    const field = resolvePrefillGearField(
+      { value: '', source: 'same-day' },
+      'w-home',
+      ['w-home'],
+    );
+    expect(field).toEqual({ value: 'w-home', source: 'default' });
+  });
+
+  it('clears the field when neither preferred nor default is selectable', () => {
+    const field = resolvePrefillGearField(
+      { value: 'w-gone', source: 'trip' },
+      'w-also-gone',
+      ['w-other'],
+    );
+    expect(field).toEqual({ value: null, source: 'none' });
   });
 });

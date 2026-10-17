@@ -17,15 +17,17 @@ export function FlightDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { data: flights, loading } = useFlights();
-  const { data: equipment } = useEquipment();
+  const { data: flights, loading: flightsLoading } = useFlights();
+  const { data: equipment, loading: equipmentLoading } = useEquipment();
 
   const flight = useMemo(
     () => flights.find((f) => f.id === id),
     [flights, id],
   );
 
-  if (loading && !flight) return <Spinner label="Loading flight…" />;
+  if ((flightsLoading && !flight) || equipmentLoading) {
+    return <Spinner label="Loading flight…" />;
+  }
   if (!flight) return <p className="text-muted">Flight not found.</p>;
 
   const initial: FlightFormValues = {

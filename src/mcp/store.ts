@@ -1,5 +1,9 @@
 import { cert, getApps, initializeApp } from 'firebase-admin/app';
-import { getFirestore, type Firestore } from 'firebase-admin/firestore';
+import {
+  getFirestore,
+  type Firestore,
+  type QueryDocumentSnapshot,
+} from 'firebase-admin/firestore';
 import { stripUndefined } from '../data/stripUndefined.js';
 import type { Equipment, Expense, Flight, UserSettings } from '../types/index.js';
 
@@ -92,7 +96,9 @@ export function createFirestoreStore(
   return {
     async listFlights() {
       const snap = await flights.get();
-      return snap.docs.map((d) => flightFromDoc(d.id, asRecord(d.data())));
+      return snap.docs.map((d: QueryDocumentSnapshot) =>
+        flightFromDoc(d.id, asRecord(d.data())),
+      );
     },
     async getFlight(id) {
       const snap = await flights.doc(id).get();
@@ -116,7 +122,9 @@ export function createFirestoreStore(
 
     async listEquipment() {
       const snap = await equipment.get();
-      return snap.docs.map((d) => equipmentFromDoc(d.id, asRecord(d.data())));
+      return snap.docs.map((d: QueryDocumentSnapshot) =>
+        equipmentFromDoc(d.id, asRecord(d.data())),
+      );
     },
     async getEquipment(id) {
       const snap = await equipment.doc(id).get();
@@ -140,7 +148,9 @@ export function createFirestoreStore(
 
     async listExpenses() {
       const snap = await expenses.get();
-      return snap.docs.map((d) => expenseFromDoc(d.id, asRecord(d.data())));
+      return snap.docs.map((d: QueryDocumentSnapshot) =>
+        expenseFromDoc(d.id, asRecord(d.data())),
+      );
     },
     async getExpense(id) {
       const snap = await expenses.doc(id).get();
